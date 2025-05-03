@@ -1,9 +1,9 @@
 import React from "react";
 
-function Login() {
-    return (
+function Register(){
+    return(
         <div>
-            <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
+              <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
                 <div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
                     <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
                         <div>
@@ -15,7 +15,7 @@ function Login() {
                         </div>
                         <div className="mt-12 flex flex-col items-center">
                             <h1 className="text-2xl xl:text-3xl font-extrabold">
-                                Login
+                                Sign up
                             </h1>
                             <div className="w-full flex-1 mt-8">
                                 <div className="flex flex-col items-center">
@@ -42,7 +42,7 @@ function Login() {
                                                 />
                                             </svg>
                                         </div>
-                                        <span className="ml-4">Login with Google</span>
+                                        <span className="ml-4">Sign up with Google</span>
                                     </button>
 
                                     <button
@@ -56,7 +56,7 @@ function Login() {
                                                 />
                                             </svg>
                                         </div>
-                                        <span className="ml-4">Login with GitHub</span>
+                                        <span className="ml-4">Sign up with GitHub</span>
                                     </button>
                                 </div>
 
@@ -92,7 +92,7 @@ function Login() {
                                             <circle cx="8.5" cy="7" r="4" />
                                             <path d="M20 8v6M23 11h-6" />
                                         </svg>
-                                        <span className="ml-3">Login</span>
+                                        <span className="ml-3">Sign up</span>
                                     </button>
                                     <p className="mt-6 text-xs text-gray-600 text-center">
                                         I agree to abide by templatana's
@@ -113,14 +113,15 @@ function Login() {
                             className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
                             style={{
                                 backgroundImage:
-                                    "url('https://i.pinimg.com/736x/ab/ef/10/abef102c516c2b02ae662c2e421a5d7b.jpg')"
+                                    "url('https://i.pinimg.com/736x/72/73/0f/72730fafa52ccee300e51086327098ad.jpg')"
                             }}
                         ></div>
                     </div>
                 </div>
             </div>
         </div>
+
     );
 }
 
-export default Login;
+export default Register
