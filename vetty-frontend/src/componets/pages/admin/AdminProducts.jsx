@@ -1,28 +1,27 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import { Input } from '../../ui/Input';
 import Modal from '../../ui/Modal';
+import { motion } from 'framer-motion';
 
-const AdminServices = () => {
-  const [services, setServices] = useState([
-    { id: 1, name: 'Vaccination', price: 100, description: 'Pet vaccinations', image: 'https://via.placeholder.com/150' },
-    { id: 2, name: 'Grooming', price: 50, description: 'Basic grooming service', image: 'https://via.placeholder.com/150' },
+const AdminProducts = () => {
+  const [products, setProducts] = useState([
+    { id: 1, name: 'Dog Food', price: 20, description: 'Premium dog food', image: 'https://via.placeholder.com/150' },
+    { id: 2, name: 'Cat Toy', price: 10, description: 'Fun toy for cats', image: 'https://via.placeholder.com/150' },
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingService, setEditingService] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({ name: '', price: '', description: '', image: '' });
 
-  const openModal = (service = null) => {
-    setEditingService(service);
-    setFormData(service || { name: '', price: '', description: '', image: '' });
+  const openModal = (product = null) => {
+    setEditingProduct(product);
+    setFormData(product || { name: '', price: '', description: '', image: '' });
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setEditingService(null);
+    setEditingProduct(null);
   };
 
   const handleChange = (e) => {
@@ -30,51 +29,51 @@ const AdminServices = () => {
   };
 
   const handleSubmit = () => {
-    if (editingService) {
-      // Update existing service
-      setServices(prev =>
-        prev.map(service =>
-          service.id === editingService.id ? { ...editingService, ...formData } : service
+    if (editingProduct) {
+      // Update product
+      setProducts(prev =>
+        prev.map(p =>
+          p.id === editingProduct.id ? { ...editingProduct, ...formData } : p
         )
       );
     } else {
-      // Add new service
-      const newService = { ...formData, id: Date.now() };
-      setServices(prev => [...prev, newService]);
+      // Add new product
+      const newProduct = { ...formData, id: Date.now() };
+      setProducts(prev => [...prev, newProduct]);
     }
     closeModal();
   };
 
   const handleDelete = (id) => {
-    setServices(prev => prev.filter(service => service.id !== id));
+    setProducts(prev => prev.filter(product => product.id !== id));
   };
 
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-blue-800">Manage Services</h2>
-        <Button onClick={() => openModal()}>Add Service</Button>
+        <h2 className="text-2xl font-bold text-blue-800">Manage Products</h2>
+        <Button onClick={() => openModal()}>Add Product</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map(service => (
+        {products.map(product => (
           <motion.div
-            key={service.id}
+            key={product.id}
             whileHover={{ scale: 1.05 }}
             className="bg-white rounded-lg shadow-md overflow-hidden"
           >
             <img
-              src={service.image}
-              alt={service.name}
+              src={product.image}
+              alt={product.name}
               className="w-full h-48 object-cover"
             />
             <div className="p-4">
-              <h3 className="text-lg font-semibold text-blue-900">{service.name}</h3>
-              <p className="text-sm text-gray-600">{service.description}</p>
-              <p className="text-sm text-gray-800 font-medium">Price: ${service.price}</p>
+              <h3 className="text-lg font-semibold text-blue-900">{product.name}</h3>
+              <p className="text-sm text-gray-600">{product.description}</p>
+              <p className="text-sm text-gray-800 font-medium">Price: ${product.price}</p>
               <div className="flex justify-between mt-3">
-                <Button size="sm" onClick={() => openModal(service)}>Edit</Button>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(service.id)}>Delete</Button>
+                <Button size="sm" onClick={() => openModal(product)}>Edit</Button>
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(product.id)}>Delete</Button>
               </div>
             </div>
           </motion.div>
@@ -84,10 +83,10 @@ const AdminServices = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
-        title={editingService ? 'Edit Service' : 'Add Service'}
+        title={editingProduct ? 'Edit Product' : 'Add Product'}
       >
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">Service Name</label>
+          <label className="block text-sm font-medium text-gray-700">Product Name</label>
           <Input
             name="name"
             value={formData.name}
@@ -113,11 +112,11 @@ const AdminServices = () => {
           />
         </div>
         <div className="mt-4 flex justify-end">
-          <Button onClick={handleSubmit}>{editingService ? 'Update' : 'Add'}</Button>
+          <Button onClick={handleSubmit}>{editingProduct ? 'Update' : 'Add'}</Button>
         </div>
       </Modal>
     </div>
   );
 };
 
-export default AdminServices;
+export default AdminProducts;
