@@ -4,8 +4,13 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-20 backdrop-blur-sm flex justify-center items-center transition-opacity duration-300">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md animate-fade-in relative">
+    <div
+      className="fixed inset-0 flex justify-center items-center transition-opacity duration-300"
+      style={{
+        backgroundColor: 'rgba(128, 128, 128, 0.2)', // Slightly stronger grey with 20% opacity
+      }}
+    >
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md animate-fade-in relative">
         {/* Close Button */}
         <button
           onClick={onClose}
