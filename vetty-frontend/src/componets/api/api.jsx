@@ -36,7 +36,6 @@ api.interceptors.response.use(
 );
 
 export default api;
-
 // how to import this file in another file
 // import api from './api';
 //import api from '../../api/api';
