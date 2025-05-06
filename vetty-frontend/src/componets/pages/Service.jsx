@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { FaSyringe, FaStethoscope, FaCut, FaTooth, FaHospitalUser } from 'react-icons/fa';
 
 const services = [
@@ -46,6 +47,16 @@ const services = [
   },
 ];
 
+const fetchServices = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:5000'); // Replace with the correct API endpoint
+    console.log('Fetched services:', response.data);
+    // You can update the state here if needed
+  } catch (error) {
+    console.error('Error fetching services:', error);
+  }
+};
+
 const ServicePage = () => {
   const [bookingService, setBookingService] = useState(null);
   const [name, setName] = useState('');
@@ -53,6 +64,10 @@ const ServicePage = () => {
   const [date, setDate] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};

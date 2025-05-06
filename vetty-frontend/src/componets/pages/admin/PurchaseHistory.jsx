@@ -2,6 +2,7 @@ import React from 'react';
 import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import dayjs from 'dayjs';
+import axios from 'axios';
 
 const PurchaseHistory = () => {
   const purchaseHistory = [
