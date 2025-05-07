@@ -15,10 +15,12 @@ import Service from './Components/pages/Services/Service';
 // Admin Routes
 import AdminRoutes from './routes/AdminRoutes';
 
+import Navbar from './components/ui/Navbar';
 function App() {
   return (
     <Provider store={store}>
       <Router>
+        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />

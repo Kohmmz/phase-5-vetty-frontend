@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaFacebookF, FaTwitter, FaInstagram, FaEnvelope, FaPhone, FaMapMarkerAlt, FaHeart } from 'react-icons/fa';
+import { FaFacebookF, FaTwitter, FaInstagram, FaEnvelope, FaPhone, FaMapMarkerAlt, FaHeart, FaTiktok } from 'react-icons/fa';
 import './Footer.css';
 
 const Footer = () => {
   const location = useLocation();
-  const showFooter = ['/home', '/products', '/about', '/services'].includes(location.pathname);
+  const showFooter = ['/', '/home', '/products', '/about', '/services'].includes(location.pathname);
 
   if (!showFooter) {
     return null;
@@ -34,6 +34,9 @@ const Footer = () => {
               <a href="#" aria-label="Instagram" className="social-link">
                 <FaInstagram />
               </a>
+              <a href="#" aria-label="TikTok" className="social-link">
+                <FaTiktok />
+              </a>
             </div>
           </div>
 
@@ -41,6 +44,12 @@ const Footer = () => {
           <div className="quick-links">
             <h3>Quick Links</h3>
             <ul>
+              <li>
+                <Link to="/home" className="link">Home</Link>
+              </li>
+              <li>
+                <Link to="/shop" className="link">Shop</Link>
+              </li>
               <li>
                 <Link to="/products" className="link">Products</Link>
               </li>
@@ -100,6 +109,16 @@ const Footer = () => {
                 <FaEnvelope className="icon" />
                 <span>info@vetty.co.ke</span>
               </li>
+            </ul>
+          </div>
+
+          {/* Opening Hours */}
+          <div className="opening-hours">
+            <h3>Opening Hours</h3>
+            <ul>
+              <li>Mon - Fri: 8:00 AM - 6:00 PM</li>
+              <li>Sat: 9:00 AM - 4:00 PM</li>
+              <li>Sun: Closed</li>
             </ul>
           </div>
         </div>

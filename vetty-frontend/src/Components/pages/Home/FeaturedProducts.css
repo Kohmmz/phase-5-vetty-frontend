@@ -1,0 +1,59 @@
+/* Container that enables horizontal scrolling */
+.featured-products-container {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 0;
+  max-width: 100%;
+  height: auto;
+
+  /* Optional: Styling the scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #888 transparent;
+}
+
+/* Scrollbar styling for WebKit (Chrome, Safari) */
+.featured-products-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.featured-products-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.featured-products-container::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+/* Flex container holding the product cards */
+.featured-products {
+  display: inline-flex;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+/* Each product card */
+.product-card {
+  display: inline-block;
+  min-width: 250px;
+  max-width: 90vw;
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+
+  /* Transition for smooth hover effect */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effects: lift, shadow, scale */
+.product-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
