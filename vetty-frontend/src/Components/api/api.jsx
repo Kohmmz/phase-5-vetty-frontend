@@ -1,5 +1,5 @@
 import axios from 'axios';
-import checkout from ./checkout;
+// import checkout from './checkout';
 const API_URL = 'https://phase-5-vetty-backend.onrender.com';
 
 const api = axios.create({
