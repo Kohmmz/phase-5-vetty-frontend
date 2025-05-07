@@ -14,9 +14,9 @@ import Notifications from '../Components/Administrator/Dashboard/Notifications';
 
 const AdminRoutes = () => {
   return (
-    <AdminLayout>
-      <Routes>
-        <Route index element={<Navigate to="dashboard" />} />
+    <Routes>
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Navigate to="dashboard" />} /> {/* Relative path */}
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
         <Route path="services" element={<AdminServices />} />
@@ -25,8 +25,8 @@ const AdminRoutes = () => {
         <Route path="service-history" element={<ServiceHistory />} />
         <Route path="purchase-history" element={<PurchaseHistory />} />
         <Route path="notifications" element={<Notifications />} />
-      </Routes>
-    </AdminLayout>
+      </Route>
+    </Routes>
   );
 };
 
