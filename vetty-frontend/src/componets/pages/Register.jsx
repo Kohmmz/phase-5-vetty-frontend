@@ -4,7 +4,7 @@ import { MdEmail } from 'react-icons/md';
 import { FaUser } from 'react-icons/fa';
 import { FaLock } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styles from './LoginSignup.module.css';
+// import styles from './LoginSignup.module.css';
 import { loginUser, registerUser, verifyEmail } from '../redux/authActions';
 import { setAuthToken } from '../redux/authSlice';
 import { clearAuthError } from '../redux/errorSlice';
