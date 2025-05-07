@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'https://phase-5-vetty-backend.onrender.com/api';
+const API_URL = 'https://phase-5-vetty-backend.onrender.com/products';
 
 // Login to get JWT token
 export const login = createAsyncThunk(
@@ -33,9 +33,7 @@ export const fetchProducts = createAsyncThunk(
       console.log('Fetching products from API...');
       const token = localStorage.getItem('token');
       
-      const response = await axios.get(`${API_URL}/products`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const response = await axios.get(`${API_URL}/products`);
       
       console.log('API response:', response.data);
       return response.data;
@@ -53,9 +51,7 @@ export const fetchProductById = createAsyncThunk(
     try {
       const token = localStorage.getItem('token');
       
-      const response = await axios.get(`${API_URL}/products/${id}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const response = await axios.get(`${API_URL}/products/${id}`);
       
       return response.data;
     } catch (error) {
