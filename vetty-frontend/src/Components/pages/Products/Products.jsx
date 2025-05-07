@@ -17,7 +17,7 @@ import {
   selectSelectedCategory,
   selectSearchTerm,
   selectSortBy
-} from "../../redux/slices/productSlice";
+} from "../../../redux/slices/productSlice";
 
 // Fallback data in case API fails
 const fallbackProducts = [

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaSyringe, FaStethoscope, FaCut, FaTooth, FaHospitalUser } from 'react-icons/fa';
-import api from '../api/api';
+import api from '../../api/api';
 const services = [
   {
     id: 1,

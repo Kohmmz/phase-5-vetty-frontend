@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import api from '../../api/api';
 
-const API_URL = 'https://phase-5-vetty-backend.onrender.com/products';
+const API_URL = 'localhost:3000'; // Replace with your API URL
 
 // Login to get JWT token
 export const login = createAsyncThunk(
@@ -9,7 +10,7 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       console.log('Attempting to login...');
-      const response = await axios.post(`${API_URL}/auth/login`, credentials);
+      const response = await axios.post(`ap/auth/login`, credentials);
       console.log('Login response:', response.data);
       
       // Store the token in localStorage

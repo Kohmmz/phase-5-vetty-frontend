@@ -8,7 +8,7 @@ import {
   selectProductById,
   selectProductsStatus,
   selectProductsError
-} from '../../redux/slices/productSlice';
+} from '../../../redux/productSlice';
 
 const ProductDetail = () => {
   const { id } = useParams();
