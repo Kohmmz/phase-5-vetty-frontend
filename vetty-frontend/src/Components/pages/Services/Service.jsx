@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaSyringe, FaStethoscope, FaCut, FaTooth, FaHospitalUser } from 'react-icons/fa';
-
+import api from '../../api/api';
 const services = [
   {
     id: 1,
