@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FiSearch, FiShoppingCart } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 import { MdSort } from "react-icons/md";
 import { Link } from "react-router-dom";
 
@@ -18,6 +18,11 @@ import {
   selectSearchTerm,
   selectSortBy
 } from "../../../redux/productSlice";
+
+import ShoppingCartIcon from "../../ShoppingCartIcon";
+import { useCart } from "../../../contexts/CartContext";
+import Navbar from '../../../layouts/Navbar';
+import './Product.css';
 
 // Fallback data in case API fails
 const fallbackProducts = [
@@ -79,10 +84,7 @@ const sortOptions = [
 ];
 
 const Products = () => {
-  // Get dispatch function to dispatch actions
   const dispatch = useDispatch();
-  
-  // Select data from the Redux store
   const filteredAndSortedProducts = useSelector(selectFilteredAndSortedProducts);
   const categories = useSelector(selectCategories);
   const status = useSelector(selectProductsStatus);
@@ -90,14 +92,12 @@ const Products = () => {
   const selectedCategory = useSelector(selectSelectedCategory);
   const searchTerm = useSelector(selectSearchTerm);
   const sortBy = useSelector(selectSortBy);
-  
-  // Determine if products are loading
+
   const isLoading = status === 'loading';
-  
-  // State to track if we should use fallback data
   const [useFallback, setUseFallback] = useState(false);
 
-  // Fetch products when component mounts
+  const { cartItems, setCartItems } = useCart();
+
   useEffect(() => {
     dispatch(fetchProducts())
       .unwrap()
@@ -107,14 +107,26 @@ const Products = () => {
       });
   }, [dispatch]);
 
+  const addToCart = (product) => {
+    const existingItem = cartItems.find(item => item.product?.id === product.id);
+    if (existingItem) {
+      const updatedItems = cartItems.map(item =>
+        item.product?.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+      setCartItems(updatedItems);
+    } else {
+      setCartItems([...cartItems, { id: Date.now(), product, quantity: 1 }]);
+    }
+  };
+
   const ProductCard = ({ product }) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 mt-20">
+    <div className="product-card">
       <Link to={`/products/${product.id}`} className="block">
-        <div className="relative pb-[100%]">
+        <div className="product-image-container">
           <img
             src={product.image}
             alt={product.name}
-            className="absolute top-0 left-0 w-full h-full object-cover"
+            className="product-image"
             loading="lazy"
             onError={(e) => {
               console.error(`Failed to load image for ${product.name}`);
@@ -122,25 +134,24 @@ const Products = () => {
             }}
           />
         </div>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
-          <p className="text-sm text-gray-600 mb-2">{product.description}</p>
+        <div className="product-info">
+          <h3 className="product-name">{product.name}</h3>
+          <p className="product-description">{product.description}</p>
           <div className="flex justify-between items-center">
-            <span className="text-xl font-bold text-indigo-600">${product.price.toFixed(2)}</span>
-            <button
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
-              aria-label={`Add ${product.name} to cart`}
-              onClick={(e) => {
-                e.preventDefault();
-                console.log(`Added ${product.name} to cart`);
-              }}
-            >
-              <FiShoppingCart className="inline-block mr-2" />
-              Add to Cart
-            </button>
+            <span className="product-price">${product.price.toFixed(2)}</span>
           </div>
         </div>
       </Link>
+      <div className="product-button-container">
+        <button
+          className="add-to-cart-button"
+          aria-label={`Add ${product.name} to cart`}
+          onClick={() => addToCart(product)}
+        >
+          <ShoppingCartIcon className="inline-block mr-2" />
+          Add to Cart
+        </button>
+      </div>
     </div>
   );
 
@@ -158,81 +169,83 @@ const Products = () => {
     </div>
   );
 
-  // Decide which products to display
   const displayProducts = useFallback ? fallbackProducts : filteredAndSortedProducts;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Pet Products</h1>
-        
-        {error && !useFallback && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            <p>{error}</p>
-          </div>
-        )}
-        
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-          <div className="relative flex-1 max-w-xl">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search pet products..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={searchTerm}
-              onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-            />
-          </div>
-          <div className="flex gap-4">
-            <select
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={selectedCategory}
-              onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-            <div className="relative">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">Pet Products</h1>
+          
+          {error && !useFallback && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+              <p>{error}</p>
+            </div>
+          )}
+          
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+            <div className="relative flex-1 max-w-xl">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search pet products..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={searchTerm}
+                onChange={(e) => dispatch(setSearchTerm(e.target.value))}
+              />
+            </div>
+            <div className="flex gap-4">
               <select
-                className="border border-gray-300 rounded-md px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-                value={sortBy}
-                onChange={(e) => dispatch(setSortBy(e.target.value))}
+                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={selectedCategory}
+                onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
               >
-                {sortOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
                 ))}
               </select>
-              <MdSort className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <div className="relative">
+                <select
+                  className="border border-gray-300 rounded-md px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                  value={sortBy}
+                  onChange={(e) => dispatch(setSortBy(e.target.value))}
+                >
+                  {sortOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+                <MdSort className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
             </div>
           </div>
-        </div>
 
-        {isLoading && !useFallback ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, index) => (
-              <SkeletonCard key={index} />
-            ))}
-          </div>
-        ) : displayProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold text-gray-600">No pet products found</h2>
-            <button
-              className="mt-4 text-indigo-600 hover:text-indigo-700"
-              onClick={() => dispatch(resetFilters())}
-            >
-              Reset Filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {displayProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
+          {isLoading && !useFallback ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, index) => (
+                <SkeletonCard key={index} />
+              ))}
+            </div>
+          ) : displayProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-semibold text-gray-600">No pet products found</h2>
+              <button
+                className="mt-4 text-indigo-600 hover:text-indigo-700"
+                onClick={() => dispatch(resetFilters())}
+              >
+                Reset Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {displayProducts.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
