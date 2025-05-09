@@ -14,7 +14,7 @@ export const loginUser = (email, password, userType, navigate) => async (dispatc
             if (userType === 'client') {
                 navigate('/home');
             } else {
-                navigate('/admin-dashboard');
+                navigate('/admin/dashboard');
             }
         } else {
             dispatch(setAuthError('Invalid credentials.'));

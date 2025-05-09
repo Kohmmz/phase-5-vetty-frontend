@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FiSearch, FiShoppingCart } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 import { MdSort } from "react-icons/md";
 import { Link } from "react-router-dom";
 
@@ -18,6 +18,9 @@ import {
   selectSearchTerm,
   selectSortBy
 } from "../../../redux/productSlice";
+
+import ShoppingCartIcon from "../../ShoppingCartIcon";
+import { useCart } from "../../../contexts/CartContext";
 
 // Fallback data in case API fails
 const fallbackProducts = [
@@ -79,10 +82,7 @@ const sortOptions = [
 ];
 
 const Products = () => {
-  // Get dispatch function to dispatch actions
   const dispatch = useDispatch();
-  
-  // Select data from the Redux store
   const filteredAndSortedProducts = useSelector(selectFilteredAndSortedProducts);
   const categories = useSelector(selectCategories);
   const status = useSelector(selectProductsStatus);
@@ -90,14 +90,12 @@ const Products = () => {
   const selectedCategory = useSelector(selectSelectedCategory);
   const searchTerm = useSelector(selectSearchTerm);
   const sortBy = useSelector(selectSortBy);
-  
-  // Determine if products are loading
+
   const isLoading = status === 'loading';
-  
-  // State to track if we should use fallback data
   const [useFallback, setUseFallback] = useState(false);
 
-  // Fetch products when component mounts
+  const { cartItems, setCartItems } = useCart();
+
   useEffect(() => {
     dispatch(fetchProducts())
       .unwrap()
@@ -106,6 +104,18 @@ const Products = () => {
         setUseFallback(true);
       });
   }, [dispatch]);
+
+  const addToCart = (product) => {
+    const existingItem = cartItems.find(item => item.product?.id === product.id);
+    if (existingItem) {
+      const updatedItems = cartItems.map(item =>
+        item.product?.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+      setCartItems(updatedItems);
+    } else {
+      setCartItems([...cartItems, { id: Date.now(), product, quantity: 1 }]);
+    }
+  };
 
   const ProductCard = ({ product }) => (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 mt-20">
@@ -127,20 +137,19 @@ const Products = () => {
           <p className="text-sm text-gray-600 mb-2">{product.description}</p>
           <div className="flex justify-between items-center">
             <span className="text-xl font-bold text-indigo-600">${product.price.toFixed(2)}</span>
-            <button
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
-              aria-label={`Add ${product.name} to cart`}
-              onClick={(e) => {
-                e.preventDefault();
-                console.log(`Added ${product.name} to cart`);
-              }}
-            >
-              <FiShoppingCart className="inline-block mr-2" />
-              Add to Cart
-            </button>
           </div>
         </div>
       </Link>
+      <div className="p-4 flex justify-center">
+        <button
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+          aria-label={`Add ${product.name} to cart`}
+          onClick={() => addToCart(product)}
+        >
+          <ShoppingCartIcon className="inline-block mr-2" />
+          Add to Cart
+        </button>
+      </div>
     </div>
   );
 
@@ -158,7 +167,6 @@ const Products = () => {
     </div>
   );
 
-  // Decide which products to display
   const displayProducts = useFallback ? fallbackProducts : filteredAndSortedProducts;
 
   return (

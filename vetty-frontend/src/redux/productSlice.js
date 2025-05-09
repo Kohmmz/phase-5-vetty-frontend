@@ -1,45 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSelector } from 'reselect';
 import axios from 'axios';
-// Removing API import as we're using axios directly
 
-const API_URL = 'localhost:3000'; // Replace with your API URL
-
-// Login to get JWT token
-export const login = createAsyncThunk(
-  'products/login',
-  async (credentials, { rejectWithValue }) => {
-    try {
-      console.log('Attempting to login...');
-      const response = await axios.post(`ap/auth/login`, credentials);
-      console.log('Login response:', response.data);
-      
-      // Store the token in localStorage
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-      }
-      
-      return response.data;
-    } catch (error) {
-      console.error('Login error:', error);
-      return rejectWithValue(error.message || 'Failed to login');
-    }
-  }
-);
-
-// fetching all products
+  
+// fetching all products with images from backend
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async (_, { rejectWithValue }) => {
     try {
-      console.log('Fetching products from API...');
-      const token = localStorage.getItem('token');
-      
-      const response = await axios.get(`${API_URL}/products`);
-      
-      console.log('API response:', response.data);
-      return response.data;
+      const response = await axios.get(`/products`);
+      // Map image_url to image for frontend compatibility
+      const products = response.data.map(product => ({
+        ...product,
+        image: product.image_url
+      }));
+      return products;
     } catch (error) {
-      console.error('API error:', error);
       return rejectWithValue(error.message || 'Failed to fetch products');
     }
   }
@@ -50,10 +26,7 @@ export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
   async (id, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
-      
-      const response = await axios.get(`${API_URL}/products/${id}`);
-      
+      const response = await axios.get(`/products/${id}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch product');
@@ -80,30 +53,24 @@ const productSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
-    // Action to set the selected category
     setSelectedCategory: (state, action) => {
       state.selectedCategory = action.payload;
     },
-    // Action to set the search term
     setSearchTerm: (state, action) => {
       state.searchTerm = action.payload;
     },
-    // Action to set the sort order
     setSortBy: (state, action) => {
       state.sortBy = action.payload;
     },
-    // Action to reset all filters
     resetFilters: (state) => {
       state.selectedCategory = 'All';
       state.searchTerm = '';
       state.sortBy = 'price-asc';
     },
-    // Action to set token
     setToken: (state, action) => {
       state.token = action.payload;
       state.isLoggedIn = true;
     },
-    // Action to logout
     logout: (state) => {
       state.token = null;
       state.isLoggedIn = false;
@@ -112,40 +79,20 @@ const productSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Handle login
-      .addCase(login.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.token = action.payload.token;
-        state.isLoggedIn = true;
-        state.error = null;
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = 'Sorry, unable to login. Please try again later.';
-      })
-      
-      // Handle fetchProducts
       .addCase(fetchProducts.pending, (state) => {
         state.status = 'loading';
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.products = action.payload;
-        
         // Extract unique categories from products
         const uniqueCategories = [...new Set(action.payload.map(product => product.category))];
         state.categories = ['All', ...uniqueCategories];
-        
         state.error = null;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = 'failed';
         state.error = 'Sorry, no products found. Please try again later.';
-        console.log('Providing fallback data due to API failure');
-        
         // Provide fallback data when the API fails
         state.products = [
           {
@@ -175,8 +122,6 @@ const productSlice = createSlice({
         ];
         state.categories = ['All', 'Category 1', 'Category 2', 'Category 3'];
       })
-      
-      // Handle fetchProductById
       .addCase(fetchProductById.pending, (state) => {
         state.status = 'loading';
       })
@@ -185,18 +130,19 @@ const productSlice = createSlice({
         state.product = action.payload;
         state.error = null;
       })
-      .addCase(fetchProductById.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = 'Sorry, product not found. Please try another product.';
-      });
+    .addCase(fetchProductById.rejected, (state, action) => {
+      state.status = 'failed';
+      state.error = 'Sorry, product not found. Please try another product.';
+      state.product = null;
+    });
   }
 });
 
 // Export actions
-export const { 
-  setSelectedCategory, 
-  setSearchTerm, 
-  setSortBy, 
+export const {
+  setSelectedCategory,
+  setSearchTerm,
+  setSortBy,
   resetFilters,
   setToken,
   logout
@@ -214,40 +160,46 @@ export const selectSortBy = (state) => state.products.sortBy;
 export const selectToken = (state) => state.products.token;
 export const selectIsLoggedIn = (state) => state.products.isLoggedIn;
 
-// Create a selector for filtered and sorted products
-export const selectFilteredAndSortedProducts = (state) => {
-  const { products, selectedCategory, searchTerm, sortBy } = state.products;
-  
-  let filtered = [...products];
-  
-  // Filter by category
-  if (selectedCategory !== 'All') {
-    filtered = filtered.filter(product => product.category === selectedCategory);
-  }
-  
-  // Filter by search term
-  if (searchTerm) {
-    filtered = filtered.filter(product => 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
-  
-  // Sort products
-  return filtered.sort((a, b) => {
-    switch (sortBy) {
-      case 'price-asc':
-        return a.price - b.price;
-      case 'price-desc':
-        return b.price - a.price;
-      case 'name-asc':
-        return a.name.localeCompare(b.name);
-      case 'name-desc':
-        return b.name.localeCompare(a.name);
-      default:
-        return 0;
+// Memoized selector for filtered and sorted products
+export const selectFilteredAndSortedProducts = createSelector(
+  [
+    (state) => state.products.products,
+    (state) => state.products.selectedCategory,
+    (state) => state.products.searchTerm,
+    (state) => state.products.sortBy
+  ],
+  (products, selectedCategory, searchTerm, sortBy) => {
+    let filtered = [...products];
+
+    // Filter by category
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(product => product.category === selectedCategory);
     }
-  });
-};
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Sort products
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'price-asc':
+          return a.price - b.price;
+        case 'price-desc':
+          return b.price - a.price;
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
+  }
+);
 
 export default productSlice.reducer;
