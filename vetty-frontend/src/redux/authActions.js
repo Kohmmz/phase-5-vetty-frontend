@@ -4,19 +4,14 @@ import { setAuthError, clearAuthError } from './errorSlice';
 
 const baseUrl = 'http://localhost:5000';
 
-export const loginUser = (email, password, navigate) => async (dispatch) => {
+export const loginUser = (email, password, navigate, loginUserType) => async (dispatch) => {
     try {
-        const response = await axios.post(`${baseUrl}/auth/login`, { email, password });
-        const { access_token, redirect, user } = response.data;
+        const response = await axios.post(`${baseUrl}/auth/login`, { email, password, loginType: loginUserType }); // Send loginType
+        const { access_token, user } = response.data;
         if (access_token) {
-            dispatch(setAuthToken({ token: access_token, userType: user?.role || 'User' }));
+            dispatch(setAuthToken({ token: access_token, userType: user?.role || 'User' })); // Store user role
             alert('Successfully logged in.');
-
-            if (redirect) {
-                navigate(redirect);
-            } else {
-                navigate('/home');
-            }
+            // Navigation will now happen in the Login component's useEffect
         } else {
             dispatch(setAuthError('Invalid credentials.'));
         }
@@ -31,7 +26,7 @@ export const loginUser = (email, password, navigate) => async (dispatch) => {
 
 export const registerUser = (name, email, password, userType, setEmailForVerification, setFormData, setAction) => async (dispatch) => {
     try {
-        const response = await axios.post(`${baseUrl}/users`, { name, email, password });
+        const response = await axios.post(`${baseUrl}/users`, { name, email, password, role: userType }); // Send role on registration
         if (response.data.message) {
             setEmailForVerification(email);
             setFormData({ name: '', email: '', password: '' });
