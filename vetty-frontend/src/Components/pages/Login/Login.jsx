@@ -13,7 +13,7 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
-    const { token, userType } = useSelector((state) => state.auth);
+    const { token, userType: loggedInUserType } = useSelector((state) => state.auth); // Get userType from auth state
     const { error: authError } = useSelector((state) => state.error);
     const [action, setAction] = useState('login');
     const [formData, setFormData] = useState({
@@ -23,45 +23,36 @@ const Login = () => {
         otp: '',
     });
     const [emailForVerification, setEmailForVerification] = useState('');
-    // Removed local userType state, use redux userType instead
+    const [userType, setUserType] = useState('client'); // State to select user type for login
+    const [showPasswordLogin, setShowPasswordLogin] = useState(false); // State to toggle password visibility for login
+    const [showPasswordRegister, setShowPasswordRegister] = useState(false); // State to toggle password visibility for register
 
-    // Alert when verification email is sent after registration
     useEffect(() => {
         if (emailForVerification && action === 'verify') {
             alert("A verification email has been sent to " + emailForVerification + ". Please check your inbox.");
         }
     }, [emailForVerification, action]);
 
-    // Removed alert on email verified successfully when action changes from 'verify' to 'login'
-    // useEffect(() => {
-    //     if (action === 'login') {
-    //         alert('Email verified successfully. You can now log in.');
-    //     }
-    // }, [action]);
+    useEffect(() => {
+        if (token) {
+            dispatch(setAuthToken({ token, userType: loggedInUserType })); // Include userType in setAuthToken
+            if (loggedInUserType && loggedInUserType.toLowerCase() === 'admin') {
+                navigate('/dashboard');
+            } else {
+                navigate('/home');
+            }
+        }
+    }, [token, loggedInUserType, navigate, dispatch]);
 
-    // Password visibility toggle for login and registration
-    const [showPasswordLogin, setShowPasswordLogin] = useState(false);
-    const [showPasswordRegister, setShowPasswordRegister] = useState(false);
-
-    // Clear auth error on mount to avoid stale errors
     useEffect(() => {
         dispatch(clearAuthError());
     }, [dispatch]);
 
-    // Dispatch setAuthToken when token changes
-    useEffect(() => {
-        if (token) {
-            dispatch(setAuthToken({ token }));
-        }
-    }, [token, dispatch]);
-
-    // Handle input changes for form fields
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        dispatch(clearAuthError()); // Clear any previous errors on input change
+        dispatch(clearAuthError());
     };
 
-    // Handle login submission for both clients and administrators
     const handleLogin = async (e) => {
         e.preventDefault();
         if (!formData.email) {
@@ -74,19 +65,17 @@ const Login = () => {
             dispatch(setAuthError('Password is required.'));
             return;
         }
-        dispatch(loginUser(formData.email, formData.password, navigate));
+        dispatch(loginUser(formData.email, formData.password, navigate, userType)); // Pass userType to the action
     };
 
-    // Handle client registration only
     const handleRegistration = async (e) => {
         e.preventDefault();
         if (userType !== 'client') {
-            return; // Prevent registration for administrators
+            return; // Prevent registration for administrators from this form
         }
         dispatch(registerUser(formData.username, formData.email, formData.password, userType, setEmailForVerification, setFormData, setAction));
     };
 
-    // Handle email verification submission
     const handleVerification = async (e) => {
         e.preventDefault();
         try {
@@ -100,16 +89,14 @@ const Login = () => {
         }
     };
 
-    // Toggle between login and register actions for clients only
     const toggleAction = () => {
         if (userType === 'client') {
-            setFormData({ username: '', email: '', password: '', otp: '' }); // Clear form data
-            dispatch(clearAuthError()); // Clear any previous errors
+            setFormData({ username: '', email: '', password: '', otp: '' });
+            dispatch(clearAuthError());
             setAction(action === 'login' ? 'register' : 'login');
         }
     };
 
-    // Password toggle handlers
     const toggleShowPasswordLogin = () => setShowPasswordLogin(!showPasswordLogin);
     const toggleShowPasswordRegister = () => setShowPasswordRegister(!showPasswordRegister);
 
@@ -118,7 +105,7 @@ const Login = () => {
             <div className="card">
                 {action === 'login' && (
                     <form className="form" onSubmit={handleLogin}>
-                        <h2>{userType === 'client' ? 'Login' : 'Administrator Login'}</h2>
+                        <h2>{userType === 'client' ? 'Client Login' : 'Administrator Login'}</h2>
                         {authError && <p className="error">{authError}</p>}
                         <div className="inputGroup">
                             <Input
@@ -150,6 +137,18 @@ const Login = () => {
                             >
                                 {showPasswordLogin ? <FaEyeSlash /> : <FaEye />}
                             </span>
+                        </div>
+                        {/* Optional: User Type Selection */}
+                        <div className="inputGroup">
+                            <select
+                                name="userType"
+                                value={userType}
+                                onChange={(e) => setUserType(e.target.value)}
+                                className="select-user-type" // Add some styling in CSS
+                            >
+                                <option value="client">Client</option>
+                                <option value="admin">Administrator</option>
+                            </select>
                         </div>
                         <button className="button" type="submit">
                             Login
@@ -183,15 +182,15 @@ const Login = () => {
                         <h2>Register</h2>
                         {authError && <p className="error">{authError}</p>}
                         <div className="inputGroup">
-                        <Input
-                            type="text"
-                            name="username"
-                            placeholder="Name"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                        />
-                        <FaUser className="icon" />
+                            <Input
+                                type="text"
+                                name="username"
+                                placeholder="Name"
+                                value={formData.username}
+                                onChange={handleChange}
+                                required
+                            />
+                            <FaUser className="icon" />
                         </div>
                         <div className="inputGroup">
                             <Input

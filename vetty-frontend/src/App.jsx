@@ -26,58 +26,63 @@ import NavBar from './layouts/Navbar';
 import Footer from './layouts/Footer';
 
 function AppContent() {
-  const token = useSelector((state) => state.auth.token);
-  const userType = useSelector((state) => state.auth.userType);
+    const token = useSelector((state) => state.auth.token);
+    const userType = useSelector((state) => state.auth.userType);
 
-  // Redirect logic based on userType
-  const getDefaultRoute = () => {
-    if (!token) {
-      return '/login';
-    }
-    if (userType && userType.toLowerCase() === 'admin') {  // Case-insensitive check
-      return '/dashboard';
-    }
-    return '/home';
-  };
+    const getDefaultRoute = () => {
+        if (!token) {
+            return '/login';
+        }
+        if (userType && userType.toLowerCase() === 'admin') {
+            return '/dashboard';
+        }
+        return '/home';
+    };
 
-  return (
-    <Router>
-      {token && <NavBar />}
-      <Routes>
-        <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
-        <Route path="/login" element={token ? <Navigate to={getDefaultRoute()} replace /> : <Login />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/home" element={token ? <Home /> : <Navigate to="/login" replace />} />
-        <Route path="/products" element={token ? <Products /> : <Navigate to="/login" replace />} />
-        <Route path="/products/:id" element={token ? <ProductDetail /> : <Navigate to="/login" replace />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/services" element={token ? <Service /> : <Navigate to="/login" replace />} />
-        <Route path="/dashboard" element={token && userType && userType.toLowerCase() === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />} />
-        <Route path="/admin/*" element={token && userType && userType.toLowerCase() === 'admin' ? <AdminLayout /> : <Navigate to="/login" replace />}>
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="services" element={<AdminServices />} />
-          <Route path="orders" element={<OrdersManagement />} />
-          <Route path="appointments" element={<Appointments />} />
-          <Route path="service-history" element={<ServiceHistory />} />
-          <Route path="purchase-history" element={<PurchaseHistory />} />
-          <Route path="notifications" element={<Notifications />} />
-        </Route>
-      </Routes>
-      <Footer />
-    </Router>
-  );
+    return (
+        <Router>
+            {token && <NavBar />}
+            <Routes>
+                <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
+                <Route path="/login" element={token ? <Navigate to={getDefaultRoute()} replace /> : <Login />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/home" element={token ? <Home /> : <Navigate to="/login" replace />} />
+                <Route path="/products" element={token ? <Products /> : <Navigate to="/login" replace />} />
+                <Route path="/products/:id" element={token ? <ProductDetail /> : <Navigate to="/login" replace />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/services" element={token ? <Service /> : <Navigate to="/login" replace />} />
+                <Route
+                    path="/dashboard"
+                    element={token && userType && userType.toLowerCase() === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                    path="/admin/*"
+                    element={token && userType && userType.toLowerCase() === 'admin' ? <AdminLayout /> : <Navigate to="/login" replace />}
+                >
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="services" element={<AdminServices />} />
+                    <Route path="orders" element={<OrdersManagement />} />
+                    <Route path="appointments" element={<Appointments />} />
+                    <Route path="service-history" element={<ServiceHistory />} />
+                    <Route path="purchase-history" element={<PurchaseHistory />} />
+                    <Route path="notifications" element={<Notifications />} />
+                </Route>
+            </Routes>
+            <Footer />
+        </Router>
+    );
 }
 
 function App() {
-  return (
-    <Provider store={store}>
-      <CartProvider>
-        <AppContent />
-      </CartProvider>
-    </Provider>
-  );
+    return (
+        <Provider store={store}>
+            <CartProvider>
+                <AppContent />
+            </CartProvider>
+        </Provider>
+    );
 }
 
 export default App;
