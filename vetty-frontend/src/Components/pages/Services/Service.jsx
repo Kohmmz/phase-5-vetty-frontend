@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Navbar from '../../../layouts/Navbar';
 import './ServicesList.css';
 import Service from '../../User/Services/Service';
 
@@ -21,14 +22,17 @@ const ServicesList = () => {
   }, []);
 
   return (
-    <div className="services-list-container">
-      <h1>Services</h1>
-      <div className="services-list-grid">
-        {services.map(service => (
-          <Service key={service.id} service={service} />
-        ))}
+    <>
+      <Navbar />
+      <div className="services-list-container">
+        <h1>Services</h1>
+        <div className="services-list-grid">
+          {services.map(service => (
+            <Service key={service.id} service={service} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,12 +1,10 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../../../redux/cartActions';
+import './Service.css';
 
 const Service = ({ service }) => {
-  const dispatch = useDispatch();
 
   const handleBookService = () => {
-    dispatch(addToCart(service.id));
+    alert(`You have booked the service: ${service.name}`);
   };
 
   return (

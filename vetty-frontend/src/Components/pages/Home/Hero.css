@@ -1,0 +1,155 @@
+.hero-section {
+  display: flex;
+  background-color: #232f3e;
+  color: white;
+  padding: 4rem 2rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hero-content {
+  flex: 1 1 400px;
+  max-width: 600px;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.75rem;
+  margin-bottom: 2rem;
+  color: #f0c14b;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #f0c14b;
+  color: #111;
+}
+
+.btn-primary:hover {
+  background-color: #ddb347;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #f0c14b;
+  border: 2px solid #f0c14b;
+}
+
+.btn-secondary:hover {
+  background-color: #f0c14b;
+  color: #111;
+}
+
+.hero-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1.1rem;
+  color: #ddd;
+}
+
+.hero-features li {
+  margin-bottom: 0.75rem;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.hero-features li::before {
+  content: '✔';
+  position: absolute;
+  left: 0;
+  color: #f0c14b;
+  font-weight: bold;
+}
+
+.hero-testimonials {
+  margin-top: 2rem;
+}
+
+.hero-testimonials h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #f0c14b;
+}
+
+.hero-testimonials blockquote {
+  font-style: italic;
+  margin-bottom: 1rem;
+  color: #ddd;
+  border-left: 4px solid #f0c14b;
+  padding-left: 1rem;
+}
+
+.hero-testimonials cite {
+  display: block;
+  margin-top: 0.5rem;
+  font-weight: 600;
+  color: #bbb;
+}
+
+.hero-image-container {
+  flex: 1 1 400px;
+  max-width: 600px;
+}
+
+.hero-image {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-section {
+    flex-direction: column;
+    padding: 2rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-image-container {
+    max-width: 100%;
+    margin-top: 2rem;
+  }
+}

@@ -13,7 +13,7 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
-    const { token } = useSelector((state) => state.auth);
+    const { token, userType } = useSelector((state) => state.auth);
     const { error: authError } = useSelector((state) => state.error);
     const [action, setAction] = useState('login');
     const [formData, setFormData] = useState({
@@ -23,23 +23,35 @@ const Login = () => {
         otp: '',
     });
     const [emailForVerification, setEmailForVerification] = useState('');
-    
+    // Removed local userType state, use redux userType instead
+
+    // Alert when verification email is sent after registration
+    useEffect(() => {
+        if (emailForVerification && action === 'verify') {
+            alert("A verification email has been sent to " + emailForVerification + ". Please check your inbox.");
+        }
+    }, [emailForVerification, action]);
+
+    // Removed alert on email verified successfully when action changes from 'verify' to 'login'
+    // useEffect(() => {
+    //     if (action === 'login') {
+    //         alert('Email verified successfully. You can now log in.');
+    //     }
+    // }, [action]);
+
     // Password visibility toggle for login and registration
     const [showPasswordLogin, setShowPasswordLogin] = useState(false);
     const [showPasswordRegister, setShowPasswordRegister] = useState(false);
 
     // Clear auth error on mount to avoid stale errors
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch(clearAuthError());
     }, [dispatch]);
-
-    // Determine user type from location state or default to 'client'
-    const userType = location.state?.userType || 'client';
 
     // Dispatch setAuthToken when token changes
     useEffect(() => {
         if (token) {
-            dispatch(setAuthToken(token));
+            dispatch(setAuthToken({ token }));
         }
     }, [token, dispatch]);
 
@@ -62,7 +74,7 @@ const Login = () => {
             dispatch(setAuthError('Password is required.'));
             return;
         }
-        dispatch(loginUser(formData.email, formData.password, userType, navigate));
+        dispatch(loginUser(formData.email, formData.password, navigate));
     };
 
     // Handle client registration only
@@ -106,7 +118,7 @@ const Login = () => {
             <div className="card">
                 {action === 'login' && (
                     <form className="form" onSubmit={handleLogin}>
-                        <h2>{userType === 'client' ? 'Client Login' : 'Administrator Login'}</h2>
+                        <h2>{userType === 'client' ? 'Login' : 'Administrator Login'}</h2>
                         {authError && <p className="error">{authError}</p>}
                         <div className="inputGroup">
                             <Input
@@ -171,15 +183,15 @@ const Login = () => {
                         <h2>Register</h2>
                         {authError && <p className="error">{authError}</p>}
                         <div className="inputGroup">
-                            <Input
-                                type="text"
-                                name="username"
-                                placeholder="Username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                required
-                            />
-                            <FaUser className="icon" />
+                        <Input
+                            type="text"
+                            name="username"
+                            placeholder="Name"
+                            value={formData.username}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FaUser className="icon" />
                         </div>
                         <div className="inputGroup">
                             <Input
