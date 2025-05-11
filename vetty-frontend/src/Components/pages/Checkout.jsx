@@ -28,7 +28,7 @@ const Checkout= () => {
     if (serviceIdsToFetch.length > 0) {
       Promise.all(
         serviceIdsToFetch.map(id =>
-          fetch(`http://localhost:5000/services/${id}`)
+          fetch(`https://backend-testing-main.onrender.com/services/${id}`)
             .then(res => res.json())
             .then(data => ({ id, data }))
             .catch(() => null)
@@ -67,7 +67,7 @@ const Checkout= () => {
 
       // Create order
       const orderResponse = await axios.post(
-        'http://localhost:3000/api/orders',
+        'https://backend-testing-main.onrender.com/api/orders',
         { items: orderItems },
         {
           headers: {
@@ -78,7 +78,7 @@ const Checkout= () => {
 
       // Initiate payment
       const paymentResponse = await axios.post(
-        'http://localhost:3000/api/mpesa/payment',
+        'https://backend-testing-main.onrender.com/api/mpesa/payment',
         {
           phoneNumber: paymentDetails.phoneNumber,
           amount: totalPrice,

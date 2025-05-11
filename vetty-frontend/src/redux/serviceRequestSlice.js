@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_BASE_URL = 'http://localhost:5000/service_requests/';
+const API_BASE_URL = 'https://backend-testing-main.onrender.com/service_requests/';
 
 export const fetchServiceRequests = createAsyncThunk(
   'serviceRequests/fetchServiceRequests',

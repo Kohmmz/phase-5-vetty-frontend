@@ -4,8 +4,8 @@ import { Button } from '../../ui/buttons';
 import dayjs from 'dayjs';
 import './Appointments.css';
 
-const SERVICE_REQUESTS_API = 'http://localhost:5000/service_requests';
-const SERVICES_API = 'http://localhost:5000/services';
+const SERVICE_REQUESTS_API = 'https://backend-testing-main.onrender.com/service_requests';
+const SERVICES_API = 'https://backend-testing-main.onrender.com/services';
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -50,7 +50,7 @@ const Appointments = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/admin/service_requests/${id}/approve`, {
+      const response = await fetch(`https://backend-testing-main.onrender.com/admin/service_requests/${id}/approve`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -67,7 +67,7 @@ const Appointments = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/admin/service_requests/${id}/disapprove`, {
+      const response = await fetch(`https://backend-testing-main.onrender.com/admin/service_requests/${id}/disapprove`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
       });
