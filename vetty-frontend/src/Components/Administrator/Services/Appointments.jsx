@@ -1,46 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import dayjs from 'dayjs';
+import './Appointments.css';
+
+const SERVICE_REQUESTS_API = 'http://localhost:5000/service_requests';
+const SERVICES_API = 'http://localhost:5000/services';
 
 const Appointments = () => {
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      client: 'Alice Walker',
-      service: 'Vaccination',
-      date: '2025-05-10',
-      time: '14:00',
-      status: 'pending',
-    },
-    {
-      id: 2,
-      client: 'Bob Smith',
-      service: 'Check-up',
-      date: '2025-05-12',
-      time: '10:30',
-      status: 'approved',
-    },
-  ]);
+  const [appointments, setAppointments] = useState([]);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleApprove = (id) => {
-    setAppointments((prev) =>
-      prev.map((appt) =>
-        appt.id === id ? { ...appt, status: 'approved' } : appt
-      )
-    );
+  const fetchAppointments = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${SERVICE_REQUESTS_API}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed to fetch appointments');
+      const data = await response.json();
+      setAppointments(data);
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
   };
 
-  const handleDecline = (id) => {
-    setAppointments((prev) =>
-      prev.map((appt) =>
-        appt.id === id ? { ...appt, status: 'declined' } : appt
-      )
-    );
+  const fetchServices = async () => {
+    try {
+      const response = await fetch(SERVICES_API);
+      if (!response.ok) throw new Error('Failed to fetch services');
+      const data = await response.json();
+      setServices(data);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const formatDateTime = (date, time) => {
-    return dayjs(`${date}T${time}`).format('MMM D, YYYY [at] h:mm A');
+  useEffect(() => {
+    fetchAppointments();
+    fetchServices();
+  }, []);
+
+  const handleApprove = async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/admin/service_requests/${id}/approve`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed to approve appointment');
+      await fetchAppointments();
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
+
+  const handleDecline = async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/admin/service_requests/${id}/disapprove`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed to decline appointment');
+      await fetchAppointments();
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
+
+  // Helper to get service details by service_id
+  const getServiceById = (service_id) => {
+    return services.find((service) => service.id === service_id);
   };
 
   return (
@@ -52,46 +93,69 @@ const Appointments = () => {
         </div>
       </div>
 
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-600">{error}</p>}
+
       <div className="space-y-4">
-        {appointments.map((appt) => (
-          <Card key={appt.id} className="shadow-md">
-            <div className="flex justify-between">
-              <div>
-                <h3 className="font-semibold text-blue-900">{appt.client}</h3>
-                <p className="text-sm text-gray-600">Service: {appt.service}</p>
-                <p className="text-sm">Date & Time: {formatDateTime(appt.date, appt.time)}</p>
-                <p className="text-sm">
-                  Status:{' '}
-                  <span
-                    className={`font-medium ${
-                      appt.status === 'approved'
-                        ? 'text-green-600'
-                        : appt.status === 'declined'
-                        ? 'text-red-600'
-                        : 'text-yellow-600'
-                    }`}
-                  >
-                    {appt.status.charAt(0).toUpperCase() + appt.status.slice(1)}
-                  </span>
-                </p>
-              </div>
-              {appt.status === 'pending' && (
-                <div className="flex flex-col gap-2 justify-center items-end">
-                  <Button size="sm" onClick={() => handleApprove(appt.id)}>
-                    Approve
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDecline(appt.id)}
-                  >
-                    Decline
-                  </Button>
+        {appointments.map((appt) => {
+          const service = getServiceById(appt.service_id);
+          return (
+            <Card key={appt.id} className="shadow-md">
+              <div className="flex justify-between">
+                <div className="flex items-center gap-4">
+                  {service && (
+                    <img
+                      src={service.image_url}
+                      alt={service.name}
+                      className="w-24 h-24 object-cover rounded-md"
+                    />
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-blue-900">{appt.client || appt.user_id}</h3>
+                    {service && (
+                      <>
+                        <p className="text-sm text-gray-600">Service: {service.name}</p>
+                        <p className="text-sm text-gray-600">Category: {service.category || 'N/A'}</p>
+                        <p className="text-sm text-gray-600">Duration: {service.duration || 'N/A'}</p>
+                        <p className="text-sm">{service.description}</p>
+                      </>
+                    )}
+                    {!service && <p className="text-sm">Service ID: {appt.service_id}</p>}
+                    <p className="text-sm">Date & Time: {dayjs(appt.appointment_time).format('MMM D, YYYY [at] h:mm A')}</p>
+                    <p className="text-sm">
+                      Status:{' '}
+                      <span
+                        className={`font-medium ${
+                          appt.status === 'approved'
+                            ? 'text-green-600'
+                            : appt.status === 'disapproved'
+                            ? 'text-red-600'
+                            : 'text-yellow-600'
+                        }`}
+                      >
+                        {appt.status.charAt(0).toUpperCase() + appt.status.slice(1)}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-              )}
-            </div>
-          </Card>
-        ))}
+                {appt.status === 'pending' && (
+                  <div className="flex flex-col gap-2 justify-center items-end">
+                    <Button size="sm" onClick={() => handleApprove(appt.id)}>
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDecline(appt.id)}
+                    >
+                      Decline
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

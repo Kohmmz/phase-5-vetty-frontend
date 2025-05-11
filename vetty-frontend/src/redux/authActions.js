@@ -1,3 +1,4 @@
+// frontend/src/redux/authActions.js
 import axios from 'axios';
 import { setAuthToken } from './authSlice';
 import { setAuthError, clearAuthError } from './errorSlice';
@@ -9,6 +10,7 @@ export const loginUser = (email, password, navigate, loginUserType) => async (di
         const response = await axios.post(`${baseUrl}/auth/login`, { email, password, loginType: loginUserType }); // Send loginType
         const { access_token, user } = response.data;
         if (access_token) {
+            localStorage.setItem('token', access_token); // Save token to localStorage for persistence
             dispatch(setAuthToken({ token: access_token, userType: user?.role || 'User' })); // Store user role
             alert('Successfully logged in.');
             // Navigation will now happen in the Login component's useEffect

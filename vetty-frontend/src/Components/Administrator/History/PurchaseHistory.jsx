@@ -1,27 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import dayjs from 'dayjs';
+import './PurchaseHistory.css';
 
 const PurchaseHistory = () => {
-  const purchaseHistory = [
-    {
-      id: 1,
-      product: 'Flea Spray',
-      date: '2025-04-18',
-      customer: 'Jane Doe',
-      amount: 2,
-      total: 40,
-    },
-    {
-      id: 2,
-      product: 'Dog Vitamins',
-      date: '2025-04-19',
-      customer: 'John Smith',
-      amount: 1,
-      total: 25,
-    },
-  ];
+  const [purchaseHistory, setPurchaseHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchPurchaseHistory = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/admin/orders', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed to fetch purchase history');
+      const data = await response.json();
+      setPurchaseHistory(data);
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchPurchaseHistory();
+  }, []);
 
   const handleDownload = () => {
     const element = document.createElement('a');
@@ -52,16 +58,19 @@ const PurchaseHistory = () => {
         </div>
       </div>
 
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-600">{error}</p>}
+
       <div className="space-y-4">
         {purchaseHistory.map(purchase => (
           <Card key={purchase.id} className="shadow-md">
-              <div>
-                <h3 className="font-semibold text-blue-900">{purchase.product}</h3>
-                <p className="text-sm text-gray-600">Customer: {purchase.customer}</p>
-                <p className="text-sm">Date: {dayjs(purchase.date).format('MMM D, YYYY')}</p>
-                <p className="text-sm">Amount: {purchase.amount}</p>
-                <p className="text-sm font-medium">Total: ${purchase.total}</p>
-              </div>
+            <div>
+              <h3 className="font-semibold text-blue-900">{purchase.product?.name || purchase.product_id}</h3>
+              <p className="text-sm text-gray-600">Customer: {purchase.user_id}</p>
+              <p className="text-sm">Date: {dayjs(purchase.created_at).format('MMM D, YYYY')}</p>
+              <p className="text-sm">Amount: {purchase.quantity || purchase.amount}</p>
+              <p className="text-sm font-medium">Total: ${purchase.total_price || purchase.total}</p>
+            </div>
           </Card>
         ))}
       </div>

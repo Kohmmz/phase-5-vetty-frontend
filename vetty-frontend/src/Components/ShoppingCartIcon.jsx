@@ -1,13 +1,23 @@
 import React from 'react';
 import { FaShoppingCart } from 'react-icons/fa';
-import { useCart } from '../contexts/CartContext';
+import { useSelector } from 'react-redux';
+import { selectCartItems } from '../redux/cartSlice';
 
 const ShoppingCartIcon = ({ onClick }) => {
-  const { cartItems } = useCart();
+  const cartItems = useSelector(selectCartItems);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div onClick={onClick} style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }} role="button" tabIndex={0} aria-label="Open shopping cart" onKeyPress={(e) => { if (e.key === 'Enter') onClick(); }}>
+    <div
+      onClick={onClick}
+      style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }}
+      role="button"
+      tabIndex={0}
+      aria-label="Open shopping cart"
+      onKeyPress={(e) => {
+        if (e.key === 'Enter') onClick();
+      }}
+    >
       <FaShoppingCart size={24} />
       {totalQuantity > 0 && (
         <span

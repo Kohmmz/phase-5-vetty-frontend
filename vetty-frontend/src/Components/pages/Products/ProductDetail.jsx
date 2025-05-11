@@ -2,30 +2,37 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { FiArrowLeft, FiShoppingCart } from 'react-icons/fi';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { 
   fetchProductById,
   selectProductById,
   selectProductsStatus,
-  selectProductsError
+  selectProductsError,
+  selectAllProducts
 } from '../../../redux/productSlice';
+
+import { addItemToCart } from '../../../redux/cartSlice';
+
+import { formatCurrency } from '../../../utils/currencyFormatter';
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import ErrorMessage from '../../ui/ErrorMessage';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   
-  // Get product data from Redux store
   const product = useSelector(selectProductById);
+  const allProducts = useSelector(selectAllProducts);
   const status = useSelector(selectProductsStatus);
   const error = useSelector(selectProductsError);
   
-  // Local state for quantity
   const [quantity, setQuantity] = useState(1);
-  
-  // Loading state based on Redux status
+  const [rating, setRating] = useState(0);
+
   const loading = status === 'loading';
 
-  // Fetch product when component mounts or ID changes
   useEffect(() => {
     dispatch(fetchProductById(id));
   }, [dispatch, id]);
@@ -37,26 +44,42 @@ const ProductDetail = () => {
     }
   };
 
-  const handleAddToCart = () => {
-    console.log(`Added ${quantity} of ${product.name} to cart`);
+  const handleAddToCart = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/cart/items', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
+        },
+        body: JSON.stringify({
+          product_id: product.id,
+          quantity: quantity,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add item to cart');
+      }
+      const data = await response.json();
+      dispatch(addItemToCart({ product, quantity }));
+      toast.success('Added items to the cart successfully', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error('Error adding item to cart', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
+    }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
-        <div className="animate-pulse max-w-4xl w-full">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="bg-gray-200 h-96 w-full md:w-1/2 rounded-lg"></div>
-            <div className="w-full md:w-1/2">
-              <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-              <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="h-24 bg-gray-200 rounded w-full mb-4"></div>
-              <div className="h-10 bg-gray-200 rounded w-1/3 mb-4"></div>
-              <div className="h-12 bg-gray-200 rounded w-full"></div>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center items-center">
+        <LoadingSpinner size="xl" />
       </div>
     );
   }
@@ -64,26 +87,27 @@ const ProductDetail = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center items-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-700 mb-6">{error}</p>
-          <Link to="/products" className="text-indigo-600 hover:text-indigo-800 flex items-center justify-center">
-            <FiArrowLeft className="mr-2" /> Back to Products
-          </Link>
-        </div>
+        <ErrorMessage message={error} onRetry={() => dispatch(fetchProductById(id))} />
+        <Link to="/products" className="mt-4 text-indigo-600 hover:underline flex items-center">
+          <FiArrowLeft className="mr-2" /> Back to Products
+        </Link>
       </div>
     );
   }
 
-  // If product is not loaded yet, show nothing
   if (!product) {
     return null;
   }
 
+  const similarProducts = allProducts
+    .filter(p => p.category === product.category && p.id !== product.id && p.price <= product.price * 1.2)
+    .sort((a, b) => b.stock_quantity - a.stock_quantity)
+    .slice(0, 5);
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <Link to="/products" className="inline-flex items-center text-indigo-600 hover:text-indigo-800 mb-6">
+        <Link to="/products" className="inline-flex items-center text-indigo-600 hover:underline mb-6">
           <FiArrowLeft className="mr-2" /> Back to Products
         </Link>
 
@@ -92,11 +116,10 @@ const ProductDetail = () => {
             <div className="md:w-1/2">
               <div className="relative pb-[100%] md:pb-0 md:h-full">
                 <img
-                  src={product.image}
+                  src={product.image || product.image_url}
                   alt={product.name}
                   className="absolute top-0 left-0 w-full h-full object-cover md:absolute"
                   onError={(e) => {
-                    console.error(`Failed to load image for ${product.name}`);
                     e.target.src = 'https://via.placeholder.com/400x400?text=Image+Not+Found';
                   }}
                 />
@@ -106,7 +129,9 @@ const ProductDetail = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
               <div className="text-sm text-gray-500 mb-4">Category: {product.category}</div>
               <p className="text-gray-700 mb-6">{product.description}</p>
-              <div className="text-2xl font-bold text-indigo-600 mb-6">${product.price.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-indigo-600 mb-6">
+                {formatCurrency(product.price)}
+              </div>
               
               <div className="flex items-center mb-6">
                 <label htmlFor="quantity" className="mr-4 text-gray-700">Quantity:</label>
@@ -120,7 +145,7 @@ const ProductDetail = () => {
                   className="w-20 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
-              
+
               <button
                 onClick={handleAddToCart}
                 className="w-full bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center"
@@ -131,7 +156,32 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+        {similarProducts.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Similar Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {similarProducts.map(similar => (
+                <div key={similar.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <img
+                    src={similar.image}
+                    alt={similar.name}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/400x400?text=Image+Not+Found';
+                    }}
+                  />
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold">{similar.name}</h3>
+                    <p className="text-gray-600">{formatCurrency(similar.price)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+      <ToastContainer />
     </div>
   );
 };
