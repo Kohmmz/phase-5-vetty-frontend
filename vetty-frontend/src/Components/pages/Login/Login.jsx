@@ -1,51 +1,40 @@
-// frontend/src/pages/Auth/Login/Login.jsx
+// frontend/src/Components/pages/Login/LoginPage.jsx (Originally Login.jsx)
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MdEmail } from 'react-icons/md';
-import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useNavigate, Link } from 'react-router-dom'; // Added Link
 import './Login.css';
-import { loginUser, registerUser, verifyOTP } from '../../../redux/authActions';
-import { setAuthToken } from '../../../redux/authSlice';
+import { loginUser } from '../../../redux/authActions';
+import { setAuthToken } from '../../../redux/authSlice'; // Keep for potential direct token setting if needed
 import { clearAuthError, setAuthError } from '../../../redux/errorSlice';
 import Input from '../../ui/Input';
 
-const Login = () => {
+const LoginPage = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const dispatch = useDispatch();
-    const { token, userType: loggedInUserType } = useSelector((state) => state.auth); // Get userType from auth state
+    const { token, userType: loggedInUserType } = useSelector((state) => state.auth);
     const { error: authError } = useSelector((state) => state.error);
-    const [action, setAction] = useState('login');
+    
     const [formData, setFormData] = useState({
-        username: '',
         email: '',
         password: '',
-        otp: '',
     });
-    const [emailForVerification, setEmailForVerification] = useState('');
-    const [userType] = useState('User'); // Changed from 'client' to 'User' to match backend role validation
-    const [showPasswordLogin, setShowPasswordLogin] = useState(false); // State to toggle password visibility for login
-    const [showPasswordRegister, setShowPasswordRegister] = useState(false); // State to toggle password visibility for register
-
-    useEffect(() => {
-        if (emailForVerification && action === 'verify') {
-            alert("A verification email has been sent to " + emailForVerification + ". Please check your inbox.");
-        }
-    }, [emailForVerification, action]);
+    const [userType] = useState('User'); // Default to 'User' for login attempts from this page
+    const [showPasswordLogin, setShowPasswordLogin] = useState(false);
 
     useEffect(() => {
         if (token) {
-            localStorage.setItem('token', token); // Store the token with key 'token' to match serviceRequestSlice.js
-            localStorage.setItem('userType', loggedInUserType); // Store the userType
-            // dispatch(setAuthToken({ token, userType: loggedInUserType })); // Removed redundant dispatch
+            // Storing token and userType is good, navigation logic is also fine here.
+            localStorage.setItem('token', token); 
+            localStorage.setItem('userType', loggedInUserType); 
             if (loggedInUserType && loggedInUserType.toLowerCase() === 'admin') {
                 navigate('/dashboard');
             } else {
                 navigate('/home');
             }
         }
-    }, [token, loggedInUserType, navigate, dispatch]);
+    }, [token, loggedInUserType, navigate]);
 
     useEffect(() => {
         dispatch(clearAuthError());
@@ -58,197 +47,78 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        if (!formData.email) {
-            dispatch(clearAuthError());
+        if (!formData.email.trim()) {
             dispatch(setAuthError('Email is required.'));
             return;
         }
         if (!formData.password) {
-            dispatch(clearAuthError());
             dispatch(setAuthError('Password is required.'));
             return;
         }
-        dispatch(loginUser(formData.email, formData.password, navigate, userType)); // Pass userType to the action
-    };
-
-    const handleRegistration = async (e) => {
-        e.preventDefault();
-        if (userType !== 'User') {
-            return; // Prevent registration for administrators from this form
-        }
-        dispatch(registerUser(formData.username, formData.email, formData.password, userType, setEmailForVerification, setFormData, setAction));
-    };
-
-    const handleVerification = async (e) => {
-        e.preventDefault();
-        try {
-            await dispatch(verifyOTP(emailForVerification, formData.otp, navigate));
-            setAction('login');
-            setFormData({ username: '', email: '', password: '', otp: '' });
-            setEmailForVerification('');
-            dispatch(clearAuthError());
-        } catch {
-            // error handled in verifyOTP action
-        }
-    };
-
-    const toggleAction = () => {
-        if (userType === 'User') {
-            setFormData({ username: '', email: '', password: '', otp: '' });
-            dispatch(clearAuthError());
-            setAction(action === 'login' ? 'register' : 'login');
-        }
+        // Pass userType to loginUser. 'admin' login might need a different form or flag if UI differs.
+        dispatch(loginUser(formData.email, formData.password, navigate, userType)); 
     };
 
     const toggleShowPasswordLogin = () => setShowPasswordLogin(!showPasswordLogin);
-    const toggleShowPasswordRegister = () => setShowPasswordRegister(!showPasswordRegister);
 
     return (
         <div className="login-root container">
             <div className="card">
-                {action === 'login' && (
-                    <form className="form" onSubmit={handleLogin}>
-                        <h2>Login</h2>
-                        {authError && <p className="error">{authError}</p>}
-                        <div className="inputGroup">
-                            <Input
-                                type="email"
-                                name="email"
-                                placeholder="Email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                            <MdEmail className="icon" />
-                        </div>
-                        <div className="inputGroup" style={{ position: 'relative' }}>
-                            <Input
-                                type={showPasswordLogin ? 'text' : 'password'}
-                                name="password"
-                                placeholder="Password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                            />
-                            <FaLock className="icon" />
-                            <span
-                                className="passwordToggle"
-                                onClick={toggleShowPasswordLogin}
-                                role="button"
-                                tabIndex={0}
-                                aria-label={showPasswordLogin ? 'Hide password' : 'Show password'}
-                            >
-                                {showPasswordLogin ? <FaEyeSlash /> : <FaEye />}
-                            </span>
-                        </div>
-                        <button className="button" type="submit">
-                            Login
-                        </button>
-                        {userType === 'User' && (
-                            <>
-                                <p className="link" style={{ marginTop: '10px', fontSize: '0.9em' }}>
-                                    <a
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            navigate('/reset-password');
-                                        }}
-                                    >
-                                        Forgot Password?
-                                    </a>
-                                </p>
-                                <p className="link" style={{ marginTop: '15px', fontSize: '0.9em' }}>
-                                    Don't have an account?{' '}
-                                    <span onClick={toggleAction} className="link">
-                                        Register
-                                    </span>
-                                </p>
-                            </>
-                        )}
-                    </form>
-                )}
-
-                {action === 'register' && (
-                    <form className="form" onSubmit={handleRegistration}>
-                        <h2>Register</h2>
-                        {authError && <p className="error">{authError}</p>}
-                        <div className="inputGroup">
-                            <Input
-                                type="text"
-                                name="username"
-                                placeholder="Username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                required
-                            />
-                            <FaUser className="icon" />
-                        </div>
-                        <div className="inputGroup">
-                            <Input
-                                type="email"
-                                name="email"
-                                placeholder="Email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                            <MdEmail className="icon" />
-                        </div>
-                        <div className="inputGroup" style={{ position: 'relative' }}>
-                            <Input
-                                type={showPasswordRegister ? 'text' : 'password'}
-                                name="password"
-                                placeholder="Password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                            />
-                            <FaLock className="icon" />
-                            <span
-                                className="passwordToggle"
-                                onClick={toggleShowPasswordRegister}
-                                role="button"
-                                tabIndex={0}
-                                aria-label={showPasswordRegister ? 'Hide password' : 'Show password'}
-                            >
-                                {showPasswordRegister ? <FaEyeSlash /> : <FaEye />}
-                            </span>
-                        </div>
-                        <button className="button" type="submit">
-                            Register
-                        </button>
-                        <p className="link" style={{ marginTop: '15px', fontSize: '0.9em' }}>
-                            Already have an account?{' '}
-                            <span onClick={toggleAction} className="link">
-                                Login
-                            </span>
+                <form className="form" onSubmit={handleLogin}>
+                    <h2>Login</h2>
+                    {authError && <p className="error">{authError}</p>}
+                    <div className="inputGroup">
+                        <Input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                        />
+                        <MdEmail className="icon" />
+                    </div>
+                    <div className="inputGroup" style={{ position: 'relative' }}>
+                        <Input
+                            type={showPasswordLogin ? 'text' : 'password'}
+                            name="password"
+                            placeholder="Password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FaLock className="icon" />
+                        <span
+                            className="passwordToggle"
+                            onClick={toggleShowPasswordLogin}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={showPasswordLogin ? 'Hide password' : 'Show password'}
+                        >
+                            {showPasswordLogin ? <FaEyeSlash /> : <FaEye />}
+                        </span>
+                    </div>
+                    <button className="button" type="submit">
+                        Login
+                    </button>
+                    {/* Assuming 'User' is the primary role for this form. Admin login might be separate or handled by role detection on backend */}
+                    <>
+                        <p className="link" style={{ marginTop: '10px', fontSize: '0.9em' }}>
+                            <Link to="/reset-password"> {/* Changed to Link */}
+                                Forgot Password?
+                            </Link>
                         </p>
-                    </form>
-                )}
-
-                {action === 'verify' && (
-                    <form className="form" onSubmit={handleVerification}>
-                        <h2>Email Verification</h2>
-                        <p>Please enter the verification code sent to your email: {emailForVerification}</p>
-                        {authError && <p className="error">{authError}</p>}
-                        <div className="inputGroup">
-                            <Input
-                                type="text"
-                                name="otp"
-                                placeholder="Verification Code"
-                                value={formData.otp}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <button className="button" type="submit">
-                            Verify
-                        </button>
-                    </form>
-                )}
+                        <p className="link" style={{ marginTop: '15px', fontSize: '0.9em' }}>
+                            Don't have an account?{' '}
+                            <Link to="/register" className="link"> {/* Changed to Link */}
+                                Register
+                            </Link>
+                        </p>
+                    </>
+                </form>
             </div>
         </div>
     );
 };
 
-export default Login;
+export default LoginPage;

@@ -7,7 +7,8 @@ import Home from './Components/pages/Home/Home';
 import Products from './Components/pages/Products/Products';
 import ProductDetail from './Components/pages/Products/ProductDetail';
 import About from './Components/pages/About/About';
-import Login from './Components/pages/Login/Login';
+import LoginPage from './Components/pages/Login/Login'; // Renamed import
+import RegisterPage from './Components/pages/Login/RegisterPage'; // Added import
 import ResetPassword from './Components/pages/Login/ResetPassword';
 import Service from './Components/User/Services/Service';
 import ServicesList from './Components/pages/Services/ServicesList';
@@ -49,7 +50,8 @@ function AppContent() {
       {token && <NavBar />}
       <Routes>
         <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
-        <Route path="/login" element={token ? <Navigate to={getDefaultRoute()} replace /> : <Login />} />
+        <Route path="/login" element={token ? <Navigate to={getDefaultRoute()} replace /> : <LoginPage />} />
+        <Route path="/register" element={token ? <Navigate to={getDefaultRoute()} replace /> : <RegisterPage />} /> {/* Added route */}
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/home" element={token ? <Home /> : <Navigate to="/login" replace />} />
         <Route path="/products" element={token ? <Products /> : <Navigate to="/login" replace />} />
