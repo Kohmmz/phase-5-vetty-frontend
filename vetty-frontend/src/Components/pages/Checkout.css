@@ -1,0 +1,145 @@
+/* Checkout page styling improvements */
+.checkout-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9fafb;
+  color: #333;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.1);
+}
+
+.checkout-summary {
+  margin-bottom: 30px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+}
+
+.checkout-items-grid {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.checkout-item-card {
+  display: contents;
+}
+
+.checkout-item-image-container {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkout-item-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.checkout-item-image-placeholder {
+  font-size: 12px;
+  color: #999;
+}
+
+.checkout-item-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 16px;
+  color: #111827;
+}
+
+.checkout-item-details h3 {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.checkout-item-description {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.checkout-item-price,
+.checkout-item-quantity,
+.checkout-item-subtotal {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.checkout-total {
+  font-size: 22px;
+  font-weight: bold;
+  text-align: right;
+  margin-top: 20px;
+  color: #b12704; /* Amazon price red */
+}
+
+.payment-section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+}
+
+.payment-section h2 {
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.payment-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.payment-section input[type="tel"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.payment-section input[type="tel"]:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+}
+
+.payment-section button {
+  background-color: #f0c14b; /* Amazon yellow */
+  border: 1px solid #a88734;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.payment-section button:hover {
+  background-color: #ddb347;
+}
+
+.error-message {
+  color: #ff4d4f;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
