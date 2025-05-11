@@ -1,10 +1,11 @@
+// frontend/src/pages/Auth/Login/Login.jsx
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MdEmail } from 'react-icons/md';
 import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Login.css';
-import { loginUser, registerUser, verifyEmail } from '../../../redux/authActions';
+import { loginUser, registerUser, verifyOTP } from '../../../redux/authActions';
 import { setAuthToken } from '../../../redux/authSlice';
 import { clearAuthError, setAuthError } from '../../../redux/errorSlice';
 import Input from '../../ui/Input';
@@ -23,7 +24,7 @@ const Login = () => {
         otp: '',
     });
     const [emailForVerification, setEmailForVerification] = useState('');
-    const [userType, setUserType] = useState('client'); // State to select user type for login
+    const [userType] = useState('User'); // Changed from 'client' to 'User' to match backend role validation
     const [showPasswordLogin, setShowPasswordLogin] = useState(false); // State to toggle password visibility for login
     const [showPasswordRegister, setShowPasswordRegister] = useState(false); // State to toggle password visibility for register
 
@@ -35,7 +36,9 @@ const Login = () => {
 
     useEffect(() => {
         if (token) {
-            dispatch(setAuthToken({ token, userType: loggedInUserType })); // Include userType in setAuthToken
+            localStorage.setItem('token', token); // Store the token with key 'token' to match serviceRequestSlice.js
+            localStorage.setItem('userType', loggedInUserType); // Store the userType
+            // dispatch(setAuthToken({ token, userType: loggedInUserType })); // Removed redundant dispatch
             if (loggedInUserType && loggedInUserType.toLowerCase() === 'admin') {
                 navigate('/dashboard');
             } else {
@@ -70,7 +73,7 @@ const Login = () => {
 
     const handleRegistration = async (e) => {
         e.preventDefault();
-        if (userType !== 'client') {
+        if (userType !== 'User') {
             return; // Prevent registration for administrators from this form
         }
         dispatch(registerUser(formData.username, formData.email, formData.password, userType, setEmailForVerification, setFormData, setAction));
@@ -79,18 +82,18 @@ const Login = () => {
     const handleVerification = async (e) => {
         e.preventDefault();
         try {
-            await dispatch(verifyEmail(emailForVerification, formData.otp, navigate));
+            await dispatch(verifyOTP(emailForVerification, formData.otp, navigate));
             setAction('login');
             setFormData({ username: '', email: '', password: '', otp: '' });
             setEmailForVerification('');
             dispatch(clearAuthError());
         } catch {
-            // error handled in verifyEmail action
+            // error handled in verifyOTP action
         }
     };
 
     const toggleAction = () => {
-        if (userType === 'client') {
+        if (userType === 'User') {
             setFormData({ username: '', email: '', password: '', otp: '' });
             dispatch(clearAuthError());
             setAction(action === 'login' ? 'register' : 'login');
@@ -105,7 +108,7 @@ const Login = () => {
             <div className="card">
                 {action === 'login' && (
                     <form className="form" onSubmit={handleLogin}>
-                        <h2>{userType === 'client' ? 'Client Login' : 'Administrator Login'}</h2>
+                        <h2>Login</h2>
                         {authError && <p className="error">{authError}</p>}
                         <div className="inputGroup">
                             <Input
@@ -138,22 +141,10 @@ const Login = () => {
                                 {showPasswordLogin ? <FaEyeSlash /> : <FaEye />}
                             </span>
                         </div>
-                        {/* Optional: User Type Selection */}
-                        <div className="inputGroup">
-                            <select
-                                name="userType"
-                                value={userType}
-                                onChange={(e) => setUserType(e.target.value)}
-                                className="select-user-type" // Add some styling in CSS
-                            >
-                                <option value="client">Client</option>
-                                <option value="admin">Administrator</option>
-                            </select>
-                        </div>
                         <button className="button" type="submit">
                             Login
                         </button>
-                        {userType === 'client' && (
+                        {userType === 'User' && (
                             <>
                                 <p className="link" style={{ marginTop: '10px', fontSize: '0.9em' }}>
                                     <a
@@ -185,7 +176,7 @@ const Login = () => {
                             <Input
                                 type="text"
                                 name="username"
-                                placeholder="Name"
+                                placeholder="Username"
                                 value={formData.username}
                                 onChange={handleChange}
                                 required

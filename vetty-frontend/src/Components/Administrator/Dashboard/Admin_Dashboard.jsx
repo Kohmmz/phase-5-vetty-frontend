@@ -1,65 +1,136 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const generateColors = (num) => {
+  const colors = [];
+  const hueStep = Math.floor(360 / num);
+  for (let i = 0; i < num; i++) {
+    colors.push(`hsl(${i * hueStep}, 70%, 50%)`);
+  }
+  return colors;
+};
 
 const AdminDashboard = () => {
-  const stats = [
-    {
-      title: 'Total Products',
-      value: 120,
-      color: 'bg-blue-500',
-      icon: '📦',
+  const [users, setUsers] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/admin/users', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      setUsers(data);
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoadingUsers(false);
+  };
+
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/admin/orders', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+      const data = await response.json();
+      setOrders(data);
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoadingOrders(false);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    fetchOrders();
+  }, []);
+
+  // Map user id to username for label display
+  const userIdToName = users.reduce((acc, user) => {
+    acc[user.id] = user.username;
+    return acc;
+  }, {});
+
+  // Count orders per user
+  const ordersCountByUser = orders.reduce((acc, order) => {
+    acc[order.user_id] = (acc[order.user_id] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Prepare data for bar chart
+  const labels = users.map((user) => user.username);
+  const dataValues = users.map((user) => ordersCountByUser[user.id] || 0);
+  const colors = generateColors(users.length);
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'Number of Orders',
+        data: dataValues,
+        backgroundColor: colors,
+        borderColor: colors,
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: { display: true, text: 'Users and Their Orders' },
     },
-    {
-      title: 'Total Services',
-      value: 85,
-      color: 'bg-green-500',
-      icon: '🛠️',
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Number of Orders' },
+      },
+      x: {
+        title: { display: true, text: 'Users' },
+      },
     },
-    {
-      title: 'Pending Appointments',
-      value: 5,
-      color: 'bg-yellow-500',
-      icon: '📅',
-    },
-  ];
+  };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-blue-700 text-center">Welcome to Vetty Admin Dashboard</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={index}
-            whileHover={{ scale: 1.05 }}
-            className={`p-6 rounded-lg shadow-lg text-white ${stat.color} flex items-center justify-between`}
-          >
-            <div>
-              <h3 className="text-lg font-medium">{stat.title}</h3>
-              <p className="text-4xl font-bold mt-2">{stat.value}</p>
-            </div>
-            <div className="text-5xl opacity-50">{stat.icon}</div>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h3 className="text-xl font-semibold text-gray-700 mb-4">Recent Activities</h3>
-        <ul className="space-y-3">
-          <li className="flex items-center justify-between">
-            <span className="text-gray-600">John placed an order for Dog Food</span>
-            <span className="text-sm text-gray-500">2 hours ago</span>
-          </li>
-          <li className="flex items-center justify-between">
-            <span className="text-gray-600">Alice booked an appointment for Vaccination</span>
-            <span className="text-sm text-gray-500">5 hours ago</span>
-          </li>
-          <li className="flex items-center justify-between">
-            <span className="text-gray-600">New product added: Cat Toy</span>
-            <span className="text-sm text-gray-500">1 day ago</span>
-          </li>
-        </ul>
-      </div>
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
+      {(loadingUsers || loadingOrders) && <p>Loading data...</p>}
+      {error && <p className="text-red-600">{error}</p>}
+      {!loadingUsers && !loadingOrders && users.length > 0 && (
+        <Bar data={data} options={options} />
+      )}
+      {!loadingUsers && !loadingOrders && users.length === 0 && <p>No users found.</p>}
     </div>
   );
 };

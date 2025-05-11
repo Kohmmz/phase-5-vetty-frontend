@@ -12,7 +12,7 @@ const Navbar = ({ isLoggedIn }) => {
   const handleLogout = () => {
     localStorage.removeItem('authToken'); // Remove the auth token
     sessionStorage.clear(); // Clear session storage
-    navigate('/login', { state: { userType: 'client' } }); // Redirect to the student login page
+    navigate('/login'); // Redirect to the client login page without state
   };
 
   const handleLogoutClick = () => {
@@ -58,7 +58,7 @@ const Navbar = ({ isLoggedIn }) => {
                 </li>
               )}
               <li>
-                <ShoppingCartIcon />
+                <ShoppingCartIcon onClick={() => navigate('/cart')} />
               </li>
             </ul>
           </div>

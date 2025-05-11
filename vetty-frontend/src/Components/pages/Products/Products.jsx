@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FiSearch } from "react-icons/fi";
 import { MdSort } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { 
   fetchProducts, 
@@ -20,7 +20,7 @@ import {
 } from "../../../redux/productSlice";
 
 import ShoppingCartIcon from "../../ShoppingCartIcon";
-import { useCart } from "../../../contexts/CartContext";
+import { addItemToCart, selectCartItems } from "../../../redux/cartSlice";
 import Navbar from '../../../layouts/Navbar';
 import './Product.css';
 
@@ -85,6 +85,7 @@ const sortOptions = [
 
 const Products = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const filteredAndSortedProducts = useSelector(selectFilteredAndSortedProducts);
   const categories = useSelector(selectCategories);
   const status = useSelector(selectProductsStatus);
@@ -92,11 +93,11 @@ const Products = () => {
   const selectedCategory = useSelector(selectSelectedCategory);
   const searchTerm = useSelector(selectSearchTerm);
   const sortBy = useSelector(selectSortBy);
+  const cartItems = useSelector(selectCartItems);
 
   const isLoading = status === 'loading';
   const [useFallback, setUseFallback] = useState(false);
-
-  const { cartItems, setCartItems } = useCart();
+  const [quantities, setQuantities] = useState({}); // key: product id, value: quantity
 
   useEffect(() => {
     dispatch(fetchProducts())
@@ -107,16 +108,18 @@ const Products = () => {
       });
   }, [dispatch]);
 
-  const addToCart = (product) => {
-    const existingItem = cartItems.find(item => item.product?.id === product.id);
-    if (existingItem) {
-      const updatedItems = cartItems.map(item =>
-        item.product?.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-      );
-      setCartItems(updatedItems);
-    } else {
-      setCartItems([...cartItems, { id: Date.now(), product, quantity: 1 }]);
-    }
+  const handleQuantityChange = (productId, value) => {
+    const qty = Math.max(1, Number(value));
+    setQuantities(prev => ({ ...prev, [productId]: qty }));
+  };
+
+  const addToCartHandler = (product) => {
+    const quantity = quantities[product.id] || 1;
+    dispatch(addItemToCart({ product, quantity }));
+  };
+
+  const goToCart = () => {
+    navigate('/cart');
   };
 
   const ProductCard = ({ product }) => (
@@ -139,19 +142,31 @@ const Products = () => {
           <p className="product-description">{product.description}</p>
           <div className="flex justify-between items-center">
             <span className="product-price">${product.price.toFixed(2)}</span>
+          {/* Removed quantity selector to fix multiple button triggering issue */}
+          {/* <select
+            className="quantity-select"
+            value={quantities[product.id] || 1}
+            onChange={(e) => handleQuantityChange(product.id, e.target.value)}
+            aria-label={`Select quantity for ${product.name}`}
+          >
+            {[...Array(10).keys()].map(i => (
+              <option key={i+1} value={i+1}>{i+1}</option>
+            ))}
+          </select> */}
           </div>
         </div>
       </Link>
-      <div className="product-button-container">
+      {/* Removed add to cart button and quantity selector to fix multiple button triggering issue */}
+      {/* <div className="product-button-container">
         <button
           className="add-to-cart-button"
           aria-label={`Add ${product.name} to cart`}
-          onClick={() => addToCart(product)}
+          onClick={() => addToCartHandler(product)}
         >
           <ShoppingCartIcon className="inline-block mr-2" />
           Add to Cart
         </button>
-      </div>
+      </div> */}
     </div>
   );
 
@@ -174,6 +189,11 @@ const Products = () => {
   return (
     <>
       <Navbar />
+      <div className="products-header flex justify-end p-4 max-w-7xl mx-auto">
+        <div onClick={goToCart} role="button" tabIndex={0} aria-label="View cart" onKeyPress={(e) => { if (e.key === 'Enter') goToCart(); }}>
+          <ShoppingCartIcon />
+        </div>
+      </div>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Pet Products</h1>
@@ -229,12 +249,16 @@ const Products = () => {
           ) : displayProducts.length === 0 ? (
             <div className="text-center py-12">
               <h2 className="text-2xl font-semibold text-gray-600">No pet products found</h2>
-              <button
-                className="mt-4 text-indigo-600 hover:text-indigo-700"
-                onClick={() => dispatch(resetFilters())}
-              >
-                Reset Filters
-              </button>
+          {/* Replaced Reset Filters button with a span to avoid button triggering issues */}
+          <span
+            className="mt-4 text-indigo-600 cursor-pointer hover:text-indigo-700"
+            onClick={() => dispatch(resetFilters())}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => { if (e.key === 'Enter') dispatch(resetFilters()); }}
+          >
+            Reset Filters
+          </span>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
