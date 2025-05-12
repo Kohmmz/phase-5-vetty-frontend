@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import api from '../../api/api'; // Import the shared Axios instance
 import { Button } from '../../ui/buttons';
 import { Input } from '../../ui/Input';
 import Modal from '../../ui/Modal';
@@ -19,13 +20,12 @@ const AdminProducts = () => {
 
   const fetchProducts = async () => {
     setLoading(true);
+    setError(null); // Clear previous errors
     try {
-      const response = await fetch('/products');
-      if (!response.ok) throw new Error('Failed to fetch products');
-      const data = await response.json();
-      setProducts(data);
+      const response = await api.get('/products'); // Use Axios instance
+      setProducts(response.data);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message || 'Failed to fetch products');
     }
     setLoading(false);
   };
@@ -55,24 +55,17 @@ const AdminProducts = () => {
     setLoading(true);
     setError(null);
     try {
-      const url = editingProduct ? `/products/${editingProduct.id}` : '/products';
-      const method = editingProduct ? 'PUT' : 'POST';
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to save product');
+      let response;
+      if (editingProduct) {
+        response = await api.put(`/products/${editingProduct.id}`, formData); // Axios handles token
+      } else {
+        response = await api.post('/products', formData); // Axios handles token
       }
+      // No need to check response.ok, Axios throws on non-2xx
       await fetchProducts();
       closeModal();
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message || 'Failed to save product');
     }
     setLoading(false);
   };
@@ -82,17 +75,11 @@ const AdminProducts = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/products/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to delete product');
-      }
+      await api.delete(`/products/${id}`); // Axios handles token
+      // No need to check response.ok
       await fetchProducts();
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message || 'Failed to delete product');
     }
     setLoading(false);
   };
