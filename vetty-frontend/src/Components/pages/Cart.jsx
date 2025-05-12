@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateCartItemQuantity, removeItemFromCart, clearCart, selectCartItems } from '../../redux/cartSlice';
 import { useNavigate, Link } from 'react-router-dom'; // Added Link
-import api from '../../api/api'; // Import the shared Axios instance
+import api from '../api/api'; // Import the shared Axios instance using alias
 import { FaTrash } from 'react-icons/fa';
 import { FiArrowLeft } from 'react-icons/fi'; // Import FiArrowLeft
 import './Cart.css'; // Import the custom CSS file
