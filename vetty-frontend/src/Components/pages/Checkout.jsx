@@ -44,11 +44,13 @@ const Checkout = () => {
   }, [cartItems, servicesDetails, api]); // Added api to dependency array
 
   useEffect(() => {
+    console.log('cartItems changed:', cartItems);
     const newTotalPrice = cartItems.reduce((total, item) => {
       const price = item.product?.price ?? item.service?.price ?? 0;
       return total + price * item.quantity;
     }, 0);
     setTotalPrice(newTotalPrice);
+    console.log('newTotalPrice:', newTotalPrice);
   }, [cartItems]);
 
   const handleProceedToPayment = () => {

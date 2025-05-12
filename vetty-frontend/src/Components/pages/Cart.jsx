@@ -45,6 +45,7 @@ const Cart = () => {
 
   const handleQuantityChange = (id, quantity) => {
     const qty = Math.max(1, Number(quantity));
+    console.log("updateCartItemQuantity", { id, quantity: qty });
     dispatch(updateCartItemQuantity({ id, quantity: qty }));
   };
 
@@ -116,20 +117,16 @@ const Cart = () => {
                         >
                           -
                         </button>
-                        <input
+                        <select
                           id={`quantity-${item.id}`}
-                          type="number"
-                          min="1"
                           value={item.quantity}
                           onChange={(e) => handleQuantityChange(item.id, e.target.value)}
-                          className="quantity-input"
-                        />
-                        <button
-                          className="quantity-button increase"
-                          onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                          className="quantity-select"
                         >
-                          +
-                        </button>
+                          {[...Array(10)].map((_, i) => (
+                            <option key={i + 1} value={i + 1}>{i + 1}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                     <p className="cart-item-subtotal">KES{(itemPrice * item.quantity).toFixed(2)}</p>
