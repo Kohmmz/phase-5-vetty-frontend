@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCartItems, clearCart } from '../../redux/cartSlice';
 import { useNavigate } from 'react-router-dom';
-import api from '@/Components/api/api'; // Import the shared Axios instance
+import api from '../api/api'; // Import the shared Axios instance
 import { formatCurrency } from '../../utils/currencyFormatter';
 import './Checkout.css'; // Import improved CSS
 
@@ -41,7 +41,7 @@ const Checkout = () => {
         setServicesDetails(prev => ({ ...prev, ...newDetails }));
       });
     }
-  }, [cartItems, servicesDetails, api]); // Added api to dependency array
+  }, [cartItems, servicesDetails]);
 
   useEffect(() => {
     console.log('cartItems changed:', cartItems);
