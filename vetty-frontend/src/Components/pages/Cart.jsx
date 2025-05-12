@@ -15,7 +15,13 @@ const Cart = () => {
   const [servicesDetails, setServicesDetails] = useState({}); // service_id -> service details
 
   useEffect(() => {
-    // Fetch full service details for service items in cart
+    // Fetch full service details for service items in cart only if token exists
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No auth token found, skipping service details fetch');
+      return;
+    }
+
     const serviceItems = cartItems.filter(item => item.service);
     const serviceIdsToFetch = serviceItems
       .map(item => item.service?.service_id ?? item.service?.id)
@@ -27,7 +33,12 @@ const Cart = () => {
           api.get(`/services/${id}`) // Use Axios instance
             .then(response => ({ id, data: response.data }))
             .catch(error => {
-              console.error(`Failed to fetch service details for ID ${id}:`, error);
+              if (error.response && error.response.status === 401) {
+                console.error(`Unauthorized to fetch service details for ID ${id}:`, error);
+                // Optionally handle logout or redirect here
+              } else {
+                console.error(`Failed to fetch service details for ID ${id}:`, error);
+              }
               return null; // Allow other fetches to succeed
             })
         )
@@ -61,9 +72,16 @@ const Cart = () => {
     navigate('/checkout');
   };
 
-  // Calculate the total amount to pay
+  // Calculate the total amount to pay with fallback for missing service prices
   const totalPrice = cartItems.reduce((total, item) => {
-    const price = item.product?.price ?? item.service?.price ?? 0;
+    let price = 0;
+    if (item.product?.price) {
+      price = item.product.price;
+    } else if (item.service) {
+      const serviceId = item.service?.service_id ?? item.service?.id;
+      const serviceDetails = serviceId ? servicesDetails[serviceId] : null;
+      price = serviceDetails?.price ?? 0;
+    }
     return total + price * item.quantity;
   }, 0);
 
