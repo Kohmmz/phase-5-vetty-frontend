@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import api from '../../api/api'; // Import the shared Axios instance
 import { Button } from '../../ui/buttons';
 import { Input } from '../../ui/Input';
 import Modal from '../../ui/Modal';
@@ -20,13 +21,12 @@ const token = useSelector(state => state.auth.token);
 
 const fetchServices = async () => {
 setLoading(true);
+setError(null); // Clear previous errors
 try {
-const response = await fetch('/services');
-if (!response.ok) throw new Error('Failed to fetch services');
-const data = await response.json();
-setServices(data);
+const response = await api.get('/services'); // Use Axios instance
+setServices(response.data);
 } catch (err) {
-setError(err.message);
+setError(err.response?.data?.error || err.message || 'Failed to fetch services');
 }
 setLoading(false);
 };
@@ -76,32 +76,25 @@ price <= 0 ||
 throw new Error('Please fill all fields correctly with valid values.');
 }
 
-const url = editingService ? `/services/${editingService.id}` : '/services';
-const method = editingService ? 'PUT' : 'POST';
-const response = await fetch(url, {
-method,
-headers: {
-'Content-Type': 'application/json',
-Authorization: `Bearer ${token}`,
-},
-body: JSON.stringify({
+const payload = {
 name,
 price,
 description,
 image_url,
 duration,
-}),
-});
-if (!response.ok) {
-const errData = await response.json();
-console.error('Error response from server:', errData);
-throw new Error(errData.error || 'Failed to save service');
+};
+let response;
+if (editingService) {
+response = await api.put(`/services/${editingService.id}`, payload); // Axios handles token
+} else {
+response = await api.post('/services', payload); // Axios handles token
 }
+// No need to check response.ok, Axios throws on non-2xx
 alert(editingService ? 'Service updated successfully.' : 'Service added successfully.');
 await fetchServices();
 closeModal();
 } catch (err) {
-setError(err.message);
+setError(err.response?.data?.error || err.message || 'Failed to save service');
 }
 setLoading(false);
 };
@@ -111,17 +104,11 @@ if (!window.confirm('Are you sure you want to delete this service?')) return;
 setLoading(true);
 setError(null);
 try {
-const response = await fetch(`/services/${id}`, {
-method: 'DELETE',
-headers: { Authorization: `Bearer ${token}` },
-});
-if (!response.ok) {
-const errData = await response.json();
-throw new Error(errData.error || 'Failed to delete service');
-}
+await api.delete(`/services/${id}`); // Axios handles token
+// No need to check response.ok
 await fetchServices();
 } catch (err) {
-setError(err.message);
+setError(err.response?.data?.error || err.message || 'Failed to delete service');
 }
 setLoading(false);
 };
@@ -212,4 +199,3 @@ onChange={handleChange}
 };
 
 export default AdminServices;
-
