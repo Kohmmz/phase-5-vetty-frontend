@@ -46,9 +46,8 @@ const initialState = {
   error: null,
   selectedCategory: 'All',
   searchTerm: '',
-  sortBy: 'price-asc',
-  token: null,
-  isLoggedIn: false
+  sortBy: 'price-asc'
+  // token and isLoggedIn removed, should be managed by authSlice
 };
 
 // Create the slice
@@ -69,16 +68,8 @@ const productSlice = createSlice({
       state.selectedCategory = 'All';
       state.searchTerm = '';
       state.sortBy = 'price-asc';
-    },
-    setToken: (state, action) => {
-      state.token = action.payload;
-      state.isLoggedIn = true;
-    },
-    logout: (state) => {
-      state.token = null;
-      state.isLoggedIn = false;
-      localStorage.removeItem('token');
     }
+    // setToken and logout reducers removed
   },
   extraReducers: (builder) => {
     builder
@@ -146,9 +137,8 @@ export const {
   setSelectedCategory,
   setSearchTerm,
   setSortBy,
-  resetFilters,
-  setToken,
-  logout
+  resetFilters
+  // setToken and logout actions removed from here
 } = productSlice.actions;
 
 // Selectors
@@ -160,8 +150,7 @@ export const selectProductsError = (state) => state.products.error;
 export const selectSelectedCategory = (state) => state.products.selectedCategory;
 export const selectSearchTerm = (state) => state.products.searchTerm;
 export const selectSortBy = (state) => state.products.sortBy;
-export const selectToken = (state) => state.products.token;
-export const selectIsLoggedIn = (state) => state.products.isLoggedIn;
+// selectToken and selectIsLoggedIn removed, should be selected from authSlice
 
 // Memoized selector for filtered and sorted products
 export const selectFilteredAndSortedProducts = createSelector(

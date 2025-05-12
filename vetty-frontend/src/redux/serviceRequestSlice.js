@@ -1,24 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../Components/api/api'; // Import the shared api instance
 
-const API_BASE_URL = 'https://backend-testing-5o8c.onrender.com/service_requests/';
+// const API_BASE_URL = 'https://backend-testing-5o8c.onrender.com/service_requests/'; // No longer needed
 
 export const fetchServiceRequests = createAsyncThunk(
   'serviceRequests/fetchServiceRequests',
   async (_, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(API_BASE_URL, {
-        headers: {
-          'Authorization': 'Bearer ' + token,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch service requests');
-      }
-      const data = await response.json();
-      return data;
+      // Token handled by api instance interceptor
+      const response = await api.get(`/service_requests/`); // Uses api instance
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.error || error.message || 'Failed to fetch service requests');
     }
   }
 );
@@ -27,8 +20,7 @@ export const createServiceRequest = createAsyncThunk(
   'serviceRequests/createServiceRequest',
   async ({ service_id, appointment_time }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
-      // Adjust appointment_time to be 1 minute in the future if not provided or in the past
+      // Token handled by api instance interceptor
       let adjustedAppointmentTime = appointment_time;
       if (!appointment_time) {
         adjustedAppointmentTime = new Date(Date.now() + 60000).toISOString();
@@ -38,32 +30,23 @@ export const createServiceRequest = createAsyncThunk(
           adjustedAppointmentTime = new Date(Date.now() + 60000).toISOString();
         }
       }
-      const response = await fetch(API_BASE_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token,
-        },
-        body: JSON.stringify({ service_id, appointment_time: adjustedAppointmentTime, status: 'pending' }),
-      });
-      if (!response.ok) {
-        let errorMessage = 'Failed to create service request';
-        try {
-          const errorData = await response.json();
-          if (errorData && errorData.validation_errors) {
-            errorMessage = JSON.stringify(errorData.validation_errors);
-          } else if (errorData && errorData.message) {
-            errorMessage = errorData.message;
-          }
-        } catch (e) {
-          // ignore JSON parse errors
-        }
-        return rejectWithValue(errorMessage);
-      }
-      const data = await response.json();
-      return data;
+      const payload = { service_id, appointment_time: adjustedAppointmentTime, status: 'pending' };
+      const response = await api.post(`/service_requests/`, payload); // Uses api instance
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      let errorMessage = 'Failed to create service request';
+      if (error.response?.data) {
+        if (error.response.data.validation_errors) {
+          errorMessage = JSON.stringify(error.response.data.validation_errors);
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -72,22 +55,11 @@ export const updateServiceRequestStatus = createAsyncThunk(
   'serviceRequests/updateServiceRequestStatus',
   async ({ id, status }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}${id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token,
-        },
-        body: JSON.stringify({ status }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update service request status');
-      }
-      const data = await response.json();
-      return { id, status: data.status };
+      // Token handled by api instance interceptor
+      const response = await api.put(`/service_requests/${id}/status`, { status }); // Uses api instance
+      return response.data; // Assuming backend returns { id, status: data.status } or similar
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.error || error.message || 'Failed to update service request status');
     }
   }
 );
