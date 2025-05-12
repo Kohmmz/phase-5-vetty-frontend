@@ -47,6 +47,11 @@ const ProductDetail = () => {
   const handleAddToCart = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!product || !product.id) {
+        toast.error('Product information is missing.');
+        return;
+      }
+
       const response = await fetch('https://backend-testing-main.onrender.com/cart/items', {
         method: 'POST',
         headers: {
@@ -58,21 +63,29 @@ const ProductDetail = () => {
           quantity: quantity,
         }),
       });
+
       if (!response.ok) {
-        throw new Error('Failed to add item to cart');
+        let errorMessage = 'Failed to add item to cart.';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || `Server error: ${response.status}`;
+        } catch (e) {
+          // If parsing error response as JSON fails, use status text
+          errorMessage = `Failed to add item to cart. Status: ${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
-      const data = await response.json();
+
+      // Assuming a successful POST to /cart/items means the backend handled it.
+      // If the backend returns the updated cart item or cart, you can use it:
+      // const responseData = await response.json(); 
+      // For now, we'll just dispatch based on frontend data.
+
       dispatch(addItemToCart({ product, quantity }));
-      toast.success('Added items to the cart successfully', {
-        position: 'top-right',
-        autoClose: 2000,
-      });
+      toast.success('Added item to the cart successfully!'); // Simplified message
     } catch (error) {
-      console.error(error);
-      toast.error('Error adding item to cart', {
-        position: 'top-right',
-        autoClose: 2000,
-      });
+      console.error("handleAddToCart error:", error);
+      toast.error(error.message || 'An unexpected error occurred.');
     }
   };
 
