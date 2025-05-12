@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
+import api from '../../api/api'; // Import the shared Axios instance
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -32,19 +33,15 @@ const AdminDashboard = () => {
     setLoadingUsers(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://backend-testing-main.onrender.com/admin/users', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      const data = await response.json();
-      setUsers(data);
+      // const token = localStorage.getItem('token'); // Token handled by api instance
+      const response = await api.get('/admin/users'); // Use Axios instance
+      // if (!response.ok) { // Axios throws for non-2xx
+      //   throw new Error('Failed to fetch users');
+      // }
+      // const data = await response.json(); // Axios response.data is already JSON
+      setUsers(response.data);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message || 'Failed to fetch users');
     }
     setLoadingUsers(false);
   };
@@ -53,19 +50,15 @@ const AdminDashboard = () => {
     setLoadingOrders(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://backend-testing-main.onrender.com/admin/orders', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders');
-      }
-      const data = await response.json();
-      setOrders(data);
+      // const token = localStorage.getItem('token'); // Token handled by api instance
+      const response = await api.get('/admin/orders'); // Use Axios instance
+      // if (!response.ok) {
+      //   throw new Error('Failed to fetch orders');
+      // }
+      // const data = await response.json();
+      setOrders(response.data);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message || 'Failed to fetch orders');
     }
     setLoadingOrders(false);
   };
