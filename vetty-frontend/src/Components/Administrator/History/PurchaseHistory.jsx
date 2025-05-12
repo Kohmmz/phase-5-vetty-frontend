@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import { fetchAllPayments } from '../../api/api';
+import api from '../../api/api';  // Import axios instance
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -25,17 +26,8 @@ const PurchaseHistory = () => {
     setLoadingUsers(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/admin/users', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      const data = await response.json();
-      setUsers(data);
+      const response = await api.get('/admin/users');  // Use axios instance with baseURL
+      setUsers(response.data);
     } catch (err) {
       setError(err.message);
     }
