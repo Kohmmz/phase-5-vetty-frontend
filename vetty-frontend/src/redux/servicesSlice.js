@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
-import axios from 'axios';
+// import axios from 'axios'; // Will be replaced by the shared api instance
+import api from '../Components/api/api'; // Import the shared api instance
 
 const initialState = {
   services: [],
@@ -11,14 +12,24 @@ const initialState = {
   sortBy: 'price-asc',
 };
 
-export const fetchServices = createAsyncThunk('services/fetchServices', async () => {
-  const response = await axios.get('/services');
-  return response.data;
+export const fetchServices = createAsyncThunk('services/fetchServices', async (_, { rejectWithValue }) => {
+  try {
+    const response = await api.get('/services'); // Use the shared api instance
+    return response.data;
+  } catch (error) {
+    // Axios errors often have response.data for backend-specific messages
+    return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch services');
+  }
 });
 
-export const fetchServiceById = createAsyncThunk('services/fetchServiceById', async (id) => {
-  const response = await axios.get(`/services/${id}`);
-  return response.data;
+export const fetchServiceById = createAsyncThunk('services/fetchServiceById', async (id, { rejectWithValue }) => {
+  try {
+    const response = await api.get(`/services/${id}`); // Use the shared api instance
+    return response.data;
+  } catch (error) {
+    // Axios errors often have response.data for backend-specific messages
+    return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch service');
+  }
 });
 
 const servicesSlice = createSlice({

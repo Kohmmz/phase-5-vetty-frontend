@@ -3,7 +3,7 @@ import axios from 'axios';
 import { setAuthToken } from './authSlice';
 import { setAuthError, clearAuthError } from './errorSlice';
 
-const baseUrl = 'https://backend-testing-main.onrender.com';
+const baseUrl = 'https://backend-testing-5o8c.onrender.com';
 
 export const loginUser = (email, password, navigate, loginUserType) => async (dispatch) => {
     try {

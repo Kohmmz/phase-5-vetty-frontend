@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_BASE_URL = 'https://backend-testing-main.onrender.com';
+const API_BASE_URL = 'https://backend-testing-5o8c.onrender.com';
 
 const initialState = {
   orders: [],

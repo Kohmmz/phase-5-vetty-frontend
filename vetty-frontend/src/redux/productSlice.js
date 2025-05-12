@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
-import axios from 'axios';
+// import axios from 'axios'; // Will be replaced by the shared api instance
+import api from '../Components/api/api'; // Import the shared api instance
 
   
 // fetching all products with images from backend
@@ -8,7 +9,7 @@ export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/products`);
+      const response = await api.get(`/products`); // Use the shared api instance
       // Map image_url to image for frontend compatibility
       const products = response.data.map(product => ({
         ...product,
@@ -16,7 +17,8 @@ export const fetchProducts = createAsyncThunk(
       }));
       return products;
     } catch (error) {
-      return rejectWithValue(error.message || 'Failed to fetch products');
+      // Axios errors often have response.data for backend-specific messages
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch products');
     }
   }
 );
@@ -26,10 +28,11 @@ export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/products/${id}`);
+      const response = await api.get(`/products/${id}`); // Use the shared api instance
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message || 'Failed to fetch product');
+      // Axios errors often have response.data for backend-specific messages
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch product');
     }
   }
 );
