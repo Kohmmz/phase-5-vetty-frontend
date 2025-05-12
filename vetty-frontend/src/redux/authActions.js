@@ -28,7 +28,8 @@ export const loginUser = (email, password, navigate, loginUserType) => async (di
 
 export const registerUser = (name, email, password, userType, setEmailForVerification, setFormData, setAction) => async (dispatch) => {
     try {
-        const response = await axios.post(`${baseUrl}/users`, { name, email, password, role: userType }); // Send role on registration
+        // Changed endpoint from /users to /auth/signup
+        const response = await axios.post(`${baseUrl}/auth/signup`, { username: name, email, password, role: userType }); 
         if (response.data.message) {
             setEmailForVerification(email);
             setFormData({ name: '', email: '', password: '' });
