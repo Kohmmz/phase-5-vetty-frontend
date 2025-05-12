@@ -15,7 +15,13 @@ const Checkout = () => {
   const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
-    // Fetch full service details for service items in cart
+    // Fetch full service details for service items in cart only if token exists
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No auth token found, skipping service details fetch');
+      return;
+    }
+
     const serviceItems = cartItems.filter(item => item.service);
     const serviceIdsToFetch = serviceItems
       .map(item => item.service.service_id ?? item.service.id)
@@ -46,12 +52,19 @@ const Checkout = () => {
   useEffect(() => {
     console.log('cartItems changed:', cartItems);
     const newTotalPrice = cartItems.reduce((total, item) => {
-      const price = item.product?.price ?? item.service?.price ?? 0;
+      let price = 0;
+      if (item.product?.price) {
+        price = item.product.price;
+      } else if (item.service) {
+        const serviceId = item.service.service_id ?? item.service.id;
+        const serviceDetails = serviceId ? servicesDetails[serviceId] : null;
+        price = serviceDetails?.price ?? 0;
+      }
       return total + price * item.quantity;
     }, 0);
     setTotalPrice(newTotalPrice);
     console.log('newTotalPrice:', newTotalPrice);
-  }, [cartItems]);
+  }, [cartItems, servicesDetails]);
 
   const handleProceedToPayment = () => {
     if (cartItems.length > 0) {
