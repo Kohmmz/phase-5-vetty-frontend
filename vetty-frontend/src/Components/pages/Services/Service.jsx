@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FiSearch } from "react-icons/fi";
 import { MdSort } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   fetchServices,
@@ -19,10 +19,10 @@ import {
   selectSortBy,
 } from '../../../redux/servicesSlice';
 
-import ShoppingCartIcon from "../../ShoppingCartIcon"; // You might not need this for services
-import { useCart } from "../../../contexts/CartContext"; // You might not need this for services
+import ShoppingCartIcon from "../../ShoppingCartIcon";
+import { addItemToCart, selectCartItems } from "../../../redux/cartSlice";
 import Navbar from '../../../layouts/Navbar';
-import '../../User/Services/Service.css'; // Fixed import path to existing Service.css
+import '../../User/Services/Service.css';
 
 // Fallback data in case API fails for services
 const fallbackServices = [
@@ -32,7 +32,7 @@ const fallbackServices = [
     price: 49.99,
     category: "Grooming",
     description: "Includes bath, brush, and nail trim.",
-    image: "https://via.placeholder.com/400x300?text=Grooming", // Placeholder image
+    image: "https://via.placeholder.com/400x300?text=Grooming",
   },
   {
     id: 2,
@@ -40,7 +40,7 @@ const fallbackServices = [
     price: 25.00,
     category: "Walking",
     description: "A 30-minute walk for your furry friend.",
-    image: "https://via.placeholder.com/400x300?text=Dog+Walking", // Placeholder image
+    image: "https://via.placeholder.com/400x300?text=Dog+Walking",
   },
   {
     id: 3,
@@ -48,7 +48,7 @@ const fallbackServices = [
     price: 75.00,
     category: "Sitting",
     description: "Overnight pet sitting at your home.",
-    image: "https://via.placeholder.com/400x300?text=Pet+Sitting", // Placeholder image
+    image: "https://via.placeholder.com/400x300?text=Pet+Sitting",
   },
   {
     id: 4,
@@ -56,7 +56,7 @@ const fallbackServices = [
     price: 120.00,
     category: "Veterinary",
     description: "Professional dental cleaning under anesthesia.",
-    image: "https://via.placeholder.com/400x300?text=Dental+Cleaning", // Placeholder image
+    image: "https://via.placeholder.com/400x300?text=Dental+Cleaning",
   },
   {
     id: 5,
@@ -64,7 +64,7 @@ const fallbackServices = [
     price: 199.00,
     category: "Training",
     description: "Four one-hour training sessions with a certified trainer.",
-    image: "https://via.placeholder.com/400x300?text=Pet+Training", // Placeholder image
+    image: "https://via.placeholder.com/400x300?text=Pet+Training",
   },
   {
     id: 6,
@@ -72,7 +72,7 @@ const fallbackServices = [
     price: 99.99,
     category: "Grooming",
     description: "Full grooming service including massage and special treatments.",
-    image: "https://via.placeholder.com/400x300?text=Pet+Spa", // Placeholder image
+    image: "https://via.placeholder.com/400x300?text=Pet+Spa",
   },
 ];
 
@@ -85,18 +85,19 @@ const sortOptions = [
 
 const Service = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const filteredAndSortedServices = useSelector(selectFilteredAndSortedServices);
-  const categories = useSelector(selectCategories);
+  const categoriesRaw = useSelector(selectCategories);
   const status = useSelector(selectServicesStatus);
   const error = useSelector(selectServicesError);
   const selectedCategory = useSelector(selectSelectedCategory);
   const searchTerm = useSelector(selectSearchTerm);
   const sortBy = useSelector(selectSortBy);
+  const cartItems = useSelector(selectCartItems);
 
   const isLoading = status === 'loading';
   const [useFallback, setUseFallback] = useState(false);
-
-  // const { cartItems, setCartItems } = useCart(); // You might not need cart functionality here
+  const [quantities, setQuantities] = useState({}); // key: service id, value: quantity
 
   useEffect(() => {
     dispatch(fetchServices())
@@ -107,20 +108,24 @@ const Service = () => {
       });
   }, [dispatch]);
 
-  // const handleAddToCart = (service) => {
-  //   // Implement your add to cart logic here if services can be "added to cart"
-  //   console.log(`Adding service ${service.name} to cart`);
-  //   // Example:
-  //   // const existingItem = cartItems.find(item => item.service?.id === service.id);
-  //   // if (existingItem) {
-  //   //   const updatedItems = cartItems.map(item =>
-  //   //     item.service?.id === service.id ? { ...item, quantity: item.quantity + 1 } : item
-  //   //   );
-  //   //   setCartItems(updatedItems);
-  //   // } else {
-  //   //   setCartItems([...cartItems, { id: Date.now(), service, quantity: 1 }]);
-  //   // }
-  // };
+  const handleQuantityChange = (serviceId, value) => {
+    const qty = Math.max(1, Number(value));
+    setQuantities(prev => ({ ...prev, [serviceId]: qty }));
+  };
+
+  const addToCartHandler = (service) => {
+    const quantity = quantities[service.id] || 1;
+    dispatch(addItemToCart({ service, quantity }));
+  };
+
+  const goToCart = () => {
+    navigate('/cart');
+  };
+
+  // Sanitize categories to remove duplicates and undefined/null values
+  const categories = Array.isArray(categoriesRaw)
+    ? Array.from(new Set(categoriesRaw.filter(cat => cat != null && cat !== '')))
+    : [];
 
   const ServiceCard = ({ service }) => (
     <div className="service-card">
@@ -145,22 +150,12 @@ const Service = () => {
           </div>
         </div>
       </Link>
-      <div className="service-button-container">
-        <button
-          className="book-service-button" // Changed class name
-          aria-label={`Book ${service.name}`} // Changed aria-label
-          onClick={() => console.log(`Booking service: ${service.name}`)} // Implement booking logic
-        >
-          {/* <ShoppingCartIcon className="inline-block mr-2" /> */} {/* Removed cart icon */}
-          Book Service {/* Changed button text */}
-        </button>
-      </div>
     </div>
   );
 
   const SkeletonCard = () => (
     <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse mt-20">
-      <div className="relative pb-[75%] bg-gray-300"></div> {/* Adjusted aspect ratio for services */}
+      <div className="relative pb-[75%] bg-gray-300"></div>
       <div className="p-4">
         <div className="h-6 bg-gray-300 rounded mb-2"></div>
         <div className="h-4 bg-gray-300 rounded mb-2"></div>
@@ -177,6 +172,11 @@ const Service = () => {
   return (
     <>
       <Navbar />
+      <div className="services-header flex justify-end p-4 max-w-7xl mx-auto">
+        <div onClick={goToCart} role="button" tabIndex={0} aria-label="View cart" onKeyPress={(e) => { if (e.key === 'Enter') goToCart(); }}>
+          <ShoppingCartIcon />
+        </div>
+      </div>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Pet Services</h1>
@@ -207,7 +207,7 @@ const Service = () => {
                 value={selectedCategory}
                 onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
               >
-                <option value="">All Categories</option> {/* Added "All Categories" option */}
+                <option value="">All Categories</option>
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
@@ -236,12 +236,15 @@ const Service = () => {
           ) : displayServices.length === 0 ? (
             <div className="text-center py-12">
               <h2 className="text-2xl font-semibold text-gray-600">No pet services found</h2>
-              <button
-                className="mt-4 text-indigo-600 hover:text-indigo-700"
+              <span
+                className="mt-4 text-indigo-600 cursor-pointer hover:text-indigo-700"
                 onClick={() => dispatch(resetFilters())}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => { if (e.key === 'Enter') dispatch(resetFilters()); }}
               >
                 Reset Filters
-              </button>
+              </span>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -257,3 +260,4 @@ const Service = () => {
 };
 
 export default Service;
+

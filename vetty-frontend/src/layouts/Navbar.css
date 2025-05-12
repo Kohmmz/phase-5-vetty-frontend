@@ -4,7 +4,7 @@
   top: 0;
   left: 0;
   z-index: 1000;
-  background: black;
+  background: rgb(77, 47, 167);
   transition: transform 0.3s ease-in-out;
   }
   

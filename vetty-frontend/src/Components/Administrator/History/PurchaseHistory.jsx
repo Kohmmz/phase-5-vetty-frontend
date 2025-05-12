@@ -1,79 +1,128 @@
-import React, { useState, useEffect } from 'react';
-import Card from '../../ui/card';
-import { Button } from '../../ui/buttons';
-import dayjs from 'dayjs';
-import './PurchaseHistory.css';
+import React, { useEffect, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const PurchaseHistory = () => {
-  const [purchaseHistory, setPurchaseHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchPurchaseHistory = async () => {
-    setLoading(true);
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/admin/orders', {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch('http://localhost:5000/admin/users', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      if (!response.ok) throw new Error('Failed to fetch purchase history');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
       const data = await response.json();
-      setPurchaseHistory(data);
+      setUsers(data);
     } catch (err) {
       setError(err.message);
     }
-    setLoading(false);
+    setLoadingUsers(false);
+  };
+
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/admin/orders', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+      const data = await response.json();
+      setOrders(data);
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoadingOrders(false);
   };
 
   useEffect(() => {
-    fetchPurchaseHistory();
+    fetchUsers();
+    fetchOrders();
   }, []);
 
-  const handleDownload = () => {
-    const element = document.createElement('a');
-    const file = new Blob([JSON.stringify(purchaseHistory, null, 2)], {
-      type: 'application/json',
-    });
-    element.href = URL.createObjectURL(file);
-    element.download = 'purchase-history.json';
-    document.body.appendChild(element);
-    element.click();
+  // Map user id to username for label display
+  const userIdToName = users.reduce((acc, user) => {
+    acc[user.id] = user.username;
+    return acc;
+  }, {});
+
+  // Sum total_price per user
+  const totalPaidByUser = orders.reduce((acc, order) => {
+    acc[order.user_id] = (acc[order.user_id] || 0) + order.total_price;
+    return acc;
+  }, {});
+
+  // Prepare data for line chart
+  const labels = users.map((user) => user.username);
+  const dataValues = users.map((user) => totalPaidByUser[user.id] || 0);
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'Total Amount Paid',
+        data: dataValues,
+        fill: false,
+        backgroundColor: 'rgb(75, 192, 192)',
+        borderColor: 'rgba(75, 192, 192, 0.6)',
+        tension: 0.1,
+      },
+    ],
   };
 
-  const handlePrint = () => {
-    window.print();
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: { display: true, text: 'Total Amount Paid by Users' },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Amount Paid' },
+      },
+      x: {
+        title: { display: true, text: 'Usernames' },
+      },
+    },
   };
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between mb-4 items-center">
-        <h2 className="text-xl font-bold text-blue-800">Purchase History</h2>
-        <div>
-          <Button onClick={handleDownload} size="sm" className="mr-2">
-            Download History
-          </Button>
-          <Button onClick={handlePrint} size="sm">
-            Print History
-          </Button>
-        </div>
-      </div>
-
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-600">{error}</p>}
-
-      <div className="space-y-4">
-        {purchaseHistory.map(purchase => (
-          <Card key={purchase.id} className="shadow-md">
-            <div>
-              <h3 className="font-semibold text-blue-900">{purchase.product?.name || purchase.product_id}</h3>
-              <p className="text-sm text-gray-600">Customer: {purchase.user_id}</p>
-              <p className="text-sm">Date: {dayjs(purchase.created_at).format('MMM D, YYYY')}</p>
-              <p className="text-sm">Amount: {purchase.quantity || purchase.amount}</p>
-              <p className="text-sm font-medium">Total: ${purchase.total_price || purchase.total}</p>
-            </div>
-          </Card>
-        ))}
-      </div>
+    <div style={{ width: '80%', margin: 'auto', paddingTop: '20px' }}>
+      {loadingUsers || loadingOrders ? (
+        <p>Loading data...</p>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
+      ) : (
+        <Line data={data} options={options} />
+      )}
     </div>
   );
 };

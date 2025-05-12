@@ -1,4 +1,3 @@
-// frontend/src/Components/pages/Login/LoginPage.jsx (Originally Login.jsx)
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MdEmail } from 'react-icons/md';
@@ -33,6 +32,9 @@ const LoginPage = () => {
             } else {
                 navigate('/home');
             }
+        } else {
+            // If no token, ensure redirect to login page
+            navigate('/login');
         }
     }, [token, loggedInUserType, navigate]);
 
@@ -121,4 +123,4 @@ const LoginPage = () => {
     );
 };
 
-export default LoginPage;
+export default Login;

@@ -21,11 +21,12 @@ import OrdersManagement from './Components/Administrator/Products/OrdersManageme
 import Appointments from './Components/Administrator/Services/Appointments';
 import ServiceHistory from './Components/Administrator/History/ServiceHistory';
 import PurchaseHistory from './Components/Administrator/History/PurchaseHistory';
-import Notifications from './Components/Administrator/Dashboard/Notifications';
+// Notifications component removed
 import ServiceRequestManagement from './Components/Administrator/Services/ServiceRequestManagement';
 
 import Cart from './Components/pages/Cart';
 import Checkout from './Components/pages/Checkout';
+import Payment from './Components/pages/Payment';
 import PaymentSuccess from './Components/pages/PaymentSuccess';
 
 import NavBar from './layouts/Navbar';
@@ -40,7 +41,7 @@ function AppContent() {
       return '/login';
     }
     if (userType && userType.toLowerCase() === 'admin') {
-      return '/dashboard';
+      return '/admin/dashboard';
     }
     return '/home';
   };
@@ -61,6 +62,7 @@ function AppContent() {
         <Route path="/about" element={token ? <About /> : <Navigate to="/login" replace />} />
         <Route path="/cart" element={token ? <Cart /> : <Navigate to="/login" replace />} />
         <Route path="/checkout" element={token ? <Checkout /> : <Navigate to="/login" replace />} />
+        <Route path="/payment" element={token ? <Payment /> : <Navigate to="/login" replace />} />
         <Route path="/payment-success" element={token ? <PaymentSuccess /> : <Navigate to="/login" replace />} />
         <Route
           path="/dashboard"
@@ -78,7 +80,7 @@ function AppContent() {
           <Route path="appointments" element={<Appointments />} />
           <Route path="service-history" element={<ServiceHistory />} />
           <Route path="purchase-history" element={<PurchaseHistory />} />
-          <Route path="notifications" element={<Notifications />} />
+          {/* Notifications route removed */}
           <Route path="service-requests" element={<ServiceRequestManagement />} />
         </Route>
       </Routes>
