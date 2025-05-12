@@ -14,6 +14,7 @@ const ServiceHistory = () => {
 
   const fetchServiceHistory = async () => {
     setLoading(true);
+    setError(null);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${SERVICE_REQUESTS_API}/`, {
@@ -29,6 +30,7 @@ const ServiceHistory = () => {
   };
 
   const fetchServices = async () => {
+    setError(null);
     try {
       const response = await fetch(SERVICES_API);
       if (!response.ok) throw new Error('Failed to fetch services');
