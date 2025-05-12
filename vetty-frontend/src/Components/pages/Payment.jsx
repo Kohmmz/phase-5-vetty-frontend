@@ -114,17 +114,7 @@ const Payment = () => {
             <FaMobileAlt className="icon" />
           </div>
 
-          <div className="inputGroup">
-            <Input
-              type="text"
-              id="order_id"
-              name="order_id"
-              placeholder="Enter your Order ID"
-              value={formData.order_id}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          
 
           <button type="submit" className="button" disabled={loading}>
             {loading ? 'Processing Payment...' : `Pay ${formatCurrency(totalPrice)}`}

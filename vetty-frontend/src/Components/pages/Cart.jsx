@@ -96,7 +96,7 @@ const Cart = () => {
                   <div className="cart-item-info">
                     <h3 className="cart-item-name">{itemName}</h3>
                     <p className="cart-item-description">{itemDescription}</p>
-                    <p className="cart-item-price">${itemPrice.toFixed(2)}</p>
+                    <p className="cart-item-price">KES{itemPrice.toFixed(2)}</p>
                     <div className="cart-item-quantity-controls">
                       <label htmlFor={`quantity-${item.id}`} className="quantity-label">Quantity:</label>
                       <div className="quantity-input-wrapper">
@@ -123,7 +123,7 @@ const Cart = () => {
                         </button>
                       </div>
                     </div>
-                    <p className="cart-item-subtotal">${(itemPrice * item.quantity).toFixed(2)}</p>
+                    <p className="cart-item-subtotal">KES{(itemPrice * item.quantity).toFixed(2)}</p>
                   </div>
                   <button
                     className="remove-item-button"
@@ -139,7 +139,7 @@ const Cart = () => {
           <div className="cart-summary">
             <div className="summary-total">
               <span className="total-label">Total:</span>
-              <span className="total-price">${totalPrice.toFixed(2)}</span>
+              <span className="total-price">KES{totalPrice.toFixed(2)}</span>
             </div>
             <div className="summary-actions">
               <button onClick={handleClearCart} className="clear-cart-button">
