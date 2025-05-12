@@ -12,6 +12,7 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   const [servicesDetails, setServicesDetails] = useState({}); // service_id -> service details
+  const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
     // Fetch full service details for service items in cart
@@ -42,17 +43,12 @@ const Checkout = () => {
     }
   }, [cartItems, servicesDetails, api]); // Added api to dependency array
 
-  const totalPrice = cartItems.reduce((total, item) => {
-    const price = item.product?.price ?? item.service?.price ?? 0;
-    return total + price * item.quantity;
-  }, 0);
-
-  // Recalculate total price whenever cartItems change
   useEffect(() => {
     const newTotalPrice = cartItems.reduce((total, item) => {
       const price = item.product?.price ?? item.service?.price ?? 0;
       return total + price * item.quantity;
     }, 0);
+    setTotalPrice(newTotalPrice);
   }, [cartItems]);
 
   const handleProceedToPayment = () => {
