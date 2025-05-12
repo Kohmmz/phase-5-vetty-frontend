@@ -10,7 +10,6 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { fetchAllPayments } from '../../api/api';
 import api from '../../api/api';  // Import axios instance
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -38,7 +37,7 @@ const PurchaseHistory = () => {
     setLoadingPayments(true);
     setError(null);
     try {
-      const response = await fetchAllPayments();
+      const response = await api.get('/payments/all');  // Fetch all payments from backend
       setPayments(response.data);
     } catch (err) {
       setError(err.message);
