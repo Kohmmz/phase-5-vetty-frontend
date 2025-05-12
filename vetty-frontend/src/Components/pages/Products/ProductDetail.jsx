@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import api from '../../api/api'; // Import the shared Axios instance
 import { FiArrowLeft, FiShoppingCart } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -52,40 +53,28 @@ const ProductDetail = () => {
         return;
       }
 
-      const response = await fetch('https://backend-testing-main.onrender.com/cart/items', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token,
-        },
-        body: JSON.stringify({
-          product_id: product.id,
-          quantity: quantity,
-        }),
-      });
-
-      if (!response.ok) {
-        let errorMessage = 'Failed to add item to cart.';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || `Server error: ${response.status}`;
-        } catch (e) {
-          // If parsing error response as JSON fails, use status text
-          errorMessage = `Failed to add item to cart. Status: ${response.status} ${response.statusText}`;
-        }
-        throw new Error(errorMessage);
-      }
+      // Token is handled by the api instance interceptor
+      const payload = {
+        product_id: product.id,
+        quantity: quantity,
+      };
+      // Using the shared api instance
+      await api.post('/cart/items', payload); 
+      
+      // No need to check response.ok, Axios throws on non-2xx errors.
+      // The catch block will handle errors.
 
       // Assuming a successful POST to /cart/items means the backend handled it.
-      // If the backend returns the updated cart item or cart, you can use it:
-      // const responseData = await response.json(); 
-      // For now, we'll just dispatch based on frontend data.
+      // If the backend returns the updated cart item or cart, 
+      // the response would be in `response.data` if needed.
+      // For now, we'll just dispatch based on frontend data as before.
 
       dispatch(addItemToCart({ product, quantity }));
-      toast.success('Added item to the cart successfully!'); // Simplified message
+      toast.success('Added item to the cart successfully!');
     } catch (error) {
       console.error("handleAddToCart error:", error);
-      toast.error(error.message || 'An unexpected error occurred.');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'An unexpected error occurred.';
+      toast.error(errorMessage);
     }
   };
 
