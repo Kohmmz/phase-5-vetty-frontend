@@ -58,9 +58,10 @@ const ProductDetail = () => {
         product_id: product.id,
         quantity: quantity,
       };
+      console.log("handleAddToCart payload:", payload);
       // Using the shared api instance
-      await api.post('/cart/items', payload); 
-      
+      await api.post('/cart/items', payload);
+
       // No need to check response.ok, Axios throws on non-2xx errors.
       // The catch block will handle errors.
 
