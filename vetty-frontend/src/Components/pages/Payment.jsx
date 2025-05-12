@@ -18,7 +18,6 @@ const Payment = () => {
 
   const [formData, setFormData] = useState({
     phone_number: '',
-    order_id: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,18 +37,12 @@ const Payment = () => {
       setError('Your cart is empty. Cannot proceed with payment.');
       setLoading(false);
       return;
-    }
 
     if (!formData.phone_number) {
       setError('Phone number is required.');
       setLoading(false);
       return;
     }
-
-    if (!formData.order_id) {
-      setError('Order ID is required.');
-      setLoading(false);
-      return;
     }
 
     try {

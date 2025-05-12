@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateCartItemQuantity, removeItemFromCart, clearCart, selectCartItems } from '../../redux/cartSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Added Link
+import api from '../../api/api'; // Import the shared Axios instance
 import { FaTrash } from 'react-icons/fa';
+import { FiArrowLeft } from 'react-icons/fi'; // Import FiArrowLeft
 import './Cart.css'; // Import the custom CSS file
 
 const Cart = () => {
@@ -22,10 +24,12 @@ const Cart = () => {
     if (serviceIdsToFetch.length > 0) {
       Promise.all(
         serviceIdsToFetch.map(id =>
-          fetch(`https://backend-testing-main.onrender.com/services/${id}`)
-            .then(res => res.json())
-            .then(data => ({ id, data }))
-            .catch(() => null)
+          api.get(`/services/${id}`) // Use Axios instance
+            .then(response => ({ id, data: response.data }))
+            .catch(error => {
+              console.error(`Failed to fetch service details for ID ${id}:`, error);
+              return null; // Allow other fetches to succeed
+            })
         )
       ).then(results => {
         const newDetails = {};
@@ -64,6 +68,11 @@ const Cart = () => {
 
   return (
     <div className="cart-container">
+      <div style={{ marginBottom: '1rem' }}> {/* Added margin for spacing */}
+        <Link to="/products" className="inline-flex items-center text-indigo-600 hover:underline">
+          <FiArrowLeft className="mr-2" /> Back to Products
+        </Link>
+      </div>
       <h1 className="cart-title">Your Shopping Cart</h1>
       {cartItems.length === 0 ? (
         <div className="empty-cart">
