@@ -16,7 +16,7 @@ const cartSlice = createSlice({
         existingItem.quantity += quantity;
       } else {
         state.cartItems.push({
-          id: Date.now(),
+          id: id,
           product,
           service,
           quantity,

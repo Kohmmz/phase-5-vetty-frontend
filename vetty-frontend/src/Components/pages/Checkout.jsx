@@ -47,6 +47,14 @@ const Checkout = () => {
     return total + price * item.quantity;
   }, 0);
 
+  // Recalculate total price whenever cartItems change
+  useEffect(() => {
+    const newTotalPrice = cartItems.reduce((total, item) => {
+      const price = item.product?.price ?? item.service?.price ?? 0;
+      return total + price * item.quantity;
+    }, 0);
+  }, [cartItems]);
+
   const handleProceedToPayment = () => {
     if (cartItems.length > 0) {
       navigate('/payment');
