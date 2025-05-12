@@ -10,14 +10,15 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { fetchAllPayments } from '../../api/api';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const PurchaseHistory = () => {
   const [users, setUsers] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [loadingPayments, setLoadingPayments] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchUsers = async () => {
@@ -41,30 +42,21 @@ const PurchaseHistory = () => {
     setLoadingUsers(false);
   };
 
-  const fetchOrders = async () => {
-    setLoadingOrders(true);
+  const fetchPayments = async () => {
+    setLoadingPayments(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/admin/orders', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders');
-      }
-      const data = await response.json();
-      setOrders(data);
+      const response = await fetchAllPayments();
+      setPayments(response.data);
     } catch (err) {
       setError(err.message);
     }
-    setLoadingOrders(false);
+    setLoadingPayments(false);
   };
 
   useEffect(() => {
     fetchUsers();
-    fetchOrders();
+    fetchPayments();
   }, []);
 
   // Map user id to username for label display
@@ -73,9 +65,9 @@ const PurchaseHistory = () => {
     return acc;
   }, {});
 
-  // Sum total_price per user
-  const totalPaidByUser = orders.reduce((acc, order) => {
-    acc[order.user_id] = (acc[order.user_id] || 0) + order.total_price;
+  // Sum amount per user from payments
+  const totalPaidByUser = payments.reduce((acc, payment) => {
+    acc[payment.user_id] = (acc[payment.user_id] || 0) + payment.amount;
     return acc;
   }, {});
 
@@ -116,7 +108,7 @@ const PurchaseHistory = () => {
 
   return (
     <div style={{ width: '80%', margin: 'auto', paddingTop: '20px' }}>
-      {loadingUsers || loadingOrders ? (
+      {loadingUsers || loadingPayments ? (
         <p>Loading data...</p>
       ) : error ? (
         <p className="text-red-600">{error}</p>

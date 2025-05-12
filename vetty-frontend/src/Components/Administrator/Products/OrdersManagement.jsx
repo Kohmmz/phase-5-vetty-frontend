@@ -24,6 +24,9 @@ const OrderManagement = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
 
+  // New state for viewing order items modal
+  const [viewingOrderId, setViewingOrderId] = useState(null);
+
   useEffect(() => {
     dispatch(fetchOrders());
     dispatch(fetchProducts());
@@ -239,6 +242,7 @@ const OrderManagement = () => {
                   <>
                     <Button size="sm" onClick={() => handleApprove(order.id)}>Approve</Button>
                     <Button size="sm" variant="destructive" onClick={() => handleDisapprove(order.id)}>Disapprove</Button>
+                    <Button size="sm" onClick={() => setViewingOrderId(order.id)}>View</Button>
                   </>
                 )}
               </div>
@@ -246,6 +250,59 @@ const OrderManagement = () => {
           </Card>
         ))}
       </div>
+
+      {viewingOrderId && (
+        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="modal-content bg-white p-6 rounded shadow-lg max-w-lg w-full max-h-[80vh] overflow-auto">
+            <h3 className="text-lg font-semibold mb-4">Order Items for Order #{viewingOrderId}</h3>
+            <button
+              className="mb-4 px-3 py-1 bg-red-600 text-white rounded"
+              onClick={() => setViewingOrderId(null)}
+            >
+              Close
+            </button>
+            <ul>
+              {orderItemsMap[viewingOrderId] && orderItemsMap[viewingOrderId].length > 0 ? (
+                orderItemsMap[viewingOrderId].map((item) => {
+                  let product = null;
+                  let service = null;
+                  if (item.product_id) {
+                    product = productMap.get(item.product_id);
+                  }
+                  if (item.service_id) {
+                    service = serviceMap.get(item.service_id);
+                  }
+                  return (
+                    <li key={item.id} className="flex items-center gap-4 my-2 border-b border-gray-300 pb-2">
+                      {product && (
+                        <>
+                          <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded" />
+                          <div>
+                            <p className="font-medium">{product.name}</p>
+                            <p className="text-sm text-gray-600">${product.price}</p>
+                          </div>
+                        </>
+                      )}
+                      {service && (
+                        <>
+                          <img src={service.image_url} alt={service.name} className="w-12 h-12 object-cover rounded" />
+                          <div>
+                            <p className="font-medium">{service.name}</p>
+                            <p className="text-sm text-gray-600">${service.price}</p>
+                          </div>
+                        </>
+                      )}
+                      <p className="text-sm">Quantity: {item.quantity}</p>
+                    </li>
+                  );
+                })
+              ) : (
+                <p>No order items found for this order.</p>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
