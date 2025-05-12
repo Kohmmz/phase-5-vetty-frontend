@@ -2,19 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCartItems, clearCart } from '../../redux/cartSlice';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './Checkout.css';
+import { formatCurrency } from '../../utils/currencyFormatter';
+import './Checkout.css'; // Import improved CSS
 
-const Checkout= () => {
+const Checkout = () => {
   const cartItems = useSelector(selectCartItems);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const [paymentDetails, setPaymentDetails] = useState({
-    phoneNumber: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const [servicesDetails, setServicesDetails] = useState({}); // service_id -> service details
 
@@ -50,67 +44,28 @@ const Checkout= () => {
     return total + price * item.quantity;
   }, 0);
 
-  const handleInputChange = (e) => {
-    setPaymentDetails({ ...paymentDetails, [e.target.name]: e.target.value });
-  };
-
-  const handlePayment = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Create order payload
-      const orderItems = cartItems.map((item) => ({
-        product_id: item.product ? item.product.id : null,
-        service_id: item.service ? item.service.id : null,
-        quantity: item.quantity,
-      }));
-
-      // Create order
-      const orderResponse = await axios.post(
-        'http://localhost:3000/api/orders',
-        { items: orderItems },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-
-      // Initiate payment
-      const paymentResponse = await axios.post(
-        'http://localhost:3000/api/mpesa/payment',
-        {
-          phoneNumber: paymentDetails.phoneNumber,
-          amount: totalPrice,
-          orderId: orderResponse.data.id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-
-      alert('Payment initiated successfully. Please complete the payment on your phone.');
-      dispatch(clearCart());
-      navigate('/payment-success');
-    } catch (err) {
-      setError('Payment failed. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
+  const handleProceedToPayment = () => {
+    if (cartItems.length > 0) {
+      navigate('/payment');
+    } else {
+      alert('Your cart is empty. Please add items to proceed.');
     }
   };
 
   return (
     <div className="checkout-container">
-      <h1>Checkout</h1>
+      <h1 className="checkout-title">Checkout</h1>
       {cartItems.length === 0 ? (
-        <p>Your cart is empty.</p>
+        <div className="empty-checkout">
+          <p className="empty-checkout-message">Your cart is empty. Please add items to proceed.</p>
+          <button onClick={() => navigate('/products')} className="continue-shopping-button">
+            Continue Shopping
+          </button>
+        </div>
       ) : (
-        <>
+        <div className="checkout-wrapper">
           <div className="checkout-summary">
-            <h2>Order Summary</h2>
+            <h2 className="summary-heading">Order Summary</h2>
             <div className="checkout-items-grid">
               {cartItems.map((item) => {
                 const serviceId = item.service?.service_id ?? item.service?.id;
@@ -118,7 +73,6 @@ const Checkout= () => {
 
                 const itemName = item.product?.name ?? serviceDetails?.name ?? 'Unknown Item';
                 const itemPrice = item.product?.price ?? serviceDetails?.price ?? 0;
-                const itemDescription = item.product?.description ?? serviceDetails?.description ?? '';
                 const itemImage = item.product?.image_url ?? item.product?.imageUrl ?? serviceDetails?.image_url ?? serviceDetails?.imageUrl ?? '';
 
                 return (
@@ -132,34 +86,24 @@ const Checkout= () => {
                     </div>
                     <div className="checkout-item-details">
                       <h3>{itemName}</h3>
-                      <p className="checkout-item-description">{itemDescription}</p>
-                      <p className="checkout-item-price">${itemPrice.toFixed(2)}</p>
+                      <p className="checkout-item-description">{item.product?.description || serviceDetails?.description || 'No description available.'}</p>
+                      <p className="checkout-item-price">{formatCurrency(itemPrice)}</p>
                       <p className="checkout-item-quantity">Quantity: {item.quantity}</p>
-                      <p className="checkout-item-subtotal">Subtotal: ${(itemPrice * item.quantity).toFixed(2)}</p>
+                      <p className="checkout-item-subtotal">{formatCurrency(itemPrice * item.quantity)}</p>
                     </div>
                   </div>
                 );
               })}
             </div>
-            <p className="checkout-total">Total: ${totalPrice.toFixed(2)}</p>
+            <p className="checkout-total">Total: {formatCurrency(totalPrice)}</p>
           </div>
           <div className="payment-section">
             <h2>Payment Details</h2>
-            <label htmlFor="phoneNumber">Phone Number:</label>
-            <input
-              type="tel"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={paymentDetails.phoneNumber}
-              onChange={handleInputChange}
-              placeholder="Enter your phone number"
-            />
-            {error && <p className="error-message">{error}</p>}
-            <button onClick={handlePayment} disabled={loading}>
-              {loading ? 'Processing...' : 'Pay Now'}
+            <button onClick={handleProceedToPayment} className="payment-button">
+              Proceed to Payment
             </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

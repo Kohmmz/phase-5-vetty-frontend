@@ -142,31 +142,9 @@ const Products = () => {
           <p className="product-description">{product.description}</p>
           <div className="flex justify-between items-center">
             <span className="product-price">${product.price.toFixed(2)}</span>
-          {/* Removed quantity selector to fix multiple button triggering issue */}
-          {/* <select
-            className="quantity-select"
-            value={quantities[product.id] || 1}
-            onChange={(e) => handleQuantityChange(product.id, e.target.value)}
-            aria-label={`Select quantity for ${product.name}`}
-          >
-            {[...Array(10).keys()].map(i => (
-              <option key={i+1} value={i+1}>{i+1}</option>
-            ))}
-          </select> */}
           </div>
         </div>
       </Link>
-      {/* Removed add to cart button and quantity selector to fix multiple button triggering issue */}
-      {/* <div className="product-button-container">
-        <button
-          className="add-to-cart-button"
-          aria-label={`Add ${product.name} to cart`}
-          onClick={() => addToCartHandler(product)}
-        >
-          <ShoppingCartIcon className="inline-block mr-2" />
-          Add to Cart
-        </button>
-      </div> */}
     </div>
   );
 
@@ -221,6 +199,7 @@ const Products = () => {
                 value={selectedCategory}
                 onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
               >
+                <option value="">All Categories</option>
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
@@ -249,16 +228,15 @@ const Products = () => {
           ) : displayProducts.length === 0 ? (
             <div className="text-center py-12">
               <h2 className="text-2xl font-semibold text-gray-600">No pet products found</h2>
-          {/* Replaced Reset Filters button with a span to avoid button triggering issues */}
-          <span
-            className="mt-4 text-indigo-600 cursor-pointer hover:text-indigo-700"
-            onClick={() => dispatch(resetFilters())}
-            role="button"
-            tabIndex={0}
-            onKeyPress={(e) => { if (e.key === 'Enter') dispatch(resetFilters()); }}
-          >
-            Reset Filters
-          </span>
+              <span
+                className="mt-4 text-indigo-600 cursor-pointer hover:text-indigo-700"
+                onClick={() => dispatch(resetFilters())}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => { if (e.key === 'Enter') dispatch(resetFilters()); }}
+              >
+                Reset Filters
+              </span>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
