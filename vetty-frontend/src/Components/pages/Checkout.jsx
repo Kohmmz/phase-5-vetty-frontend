@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCartItems, clearCart } from '../../redux/cartSlice';
 import { useNavigate } from 'react-router-dom';
+import api from '@/Components/api/api'; // Import the shared Axios instance
 import { formatCurrency } from '../../utils/currencyFormatter';
 import './Checkout.css'; // Import improved CSS
 
@@ -22,10 +23,12 @@ const Checkout = () => {
     if (serviceIdsToFetch.length > 0) {
       Promise.all(
         serviceIdsToFetch.map(id =>
-          fetch(`https://backend-testing-main.onrender.com/services/${id}`)
-            .then(res => res.json())
-            .then(data => ({ id, data }))
-            .catch(() => null)
+          api.get(`/services/${id}`) // Use shared Axios instance
+            .then(response => ({ id, data: response.data }))
+            .catch(error => {
+              console.error(`Failed to fetch service details for ID ${id}:`, error);
+              return null; // Allow other fetches to succeed
+            })
         )
       ).then(results => {
         const newDetails = {};
@@ -37,7 +40,7 @@ const Checkout = () => {
         setServicesDetails(prev => ({ ...prev, ...newDetails }));
       });
     }
-  }, [cartItems, servicesDetails]);
+  }, [cartItems, servicesDetails, api]); // Added api to dependency array
 
   const totalPrice = cartItems.reduce((total, item) => {
     const price = item.product?.price ?? item.service?.price ?? 0;
@@ -54,7 +57,12 @@ const Checkout = () => {
 
   return (
     <div className="checkout-container">
-      <h1 className="checkout-title">Checkout</h1>
+      <div className="checkout-header">
+        <button onClick={() => navigate('/cart')} className="back-to-cart-button">
+          &larr; Back to Cart
+        </button>
+        <h1 className="checkout-title">Checkout</h1>
+      </div>
       {cartItems.length === 0 ? (
         <div className="empty-checkout">
           <p className="empty-checkout-message">Your cart is empty. Please add items to proceed.</p>
