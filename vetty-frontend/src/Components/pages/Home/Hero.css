@@ -45,22 +45,22 @@
 }
 
 .btn-primary {
-  background-color: #e49826;
-  color: #d8af0d;
+  background-color: gray;
+  color: gray;
 }
 
 .btn-primary:hover {
-  background-color: #e3a924;
+  background-color: gray;
 }
 
 .btn-secondary {
   background-color: transparent;
-   color: #c88b21;
-  border: 2px solid #daae1e;
+   color: #6d675d;
+  border: 2px solid #474642;
 }
 
 .btn-secondary:hover {
-  color: #c88b21;
+  color: #504c45;
  
 }
 
