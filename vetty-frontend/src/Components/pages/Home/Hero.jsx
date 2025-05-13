@@ -1,17 +1,20 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Hero.css';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="hero-section">
       <div className="hero-content">
         <h1 className="hero-title">Welcome to Vetty</h1>
         <p className="hero-subtitle">Everything your pet needs, delivered fast</p>
         <div className="hero-buttons">
-          <button className="btn-primary" onClick={() => window.location.href = 'https://phase-5-vetty-frontend.vercel.app/products'}>
+          <button className="btn-primary" onClick={() => navigate('/products')}>
             Shop Now
           </button>
-          <button className="btn-secondary" onClick={() => window.location.href = 'https://phase-5-vetty-frontend.vercel.app/services'}>
+          <button className="btn-secondary" onClick={() => navigate('/services')}>
             Our Services
           </button>
         </div>

@@ -1,7 +1,7 @@
 .hero-section {
   display: flex;
-  background-color: white;
-  color: white;
+  background-color: rgb(234, 165, 26);
+  color: rgb(199, 135, 14);
   padding: 4rem 2rem;
   align-items: center;
   justify-content: space-between;
@@ -24,7 +24,7 @@
 .hero-subtitle {
   font-size: 1.75rem;
   margin-bottom: 2rem;
-  color: #f0c14b;
+  color: #d48326;
 }
 
 .hero-buttons {
@@ -45,23 +45,23 @@
 }
 
 .btn-primary {
-  background-color: #f0c14b;
-  color: #111;
+  background-color: #e49826;
+  color: #d8af0d;
 }
 
 .btn-primary:hover {
-  background-color: #ddb347;
+  background-color: #e3a924;
 }
 
 .btn-secondary {
   background-color: transparent;
-  color: #f0c14b;
-  border: 2px solid #f0c14b;
+   color: #c88b21;
+  border: 2px solid #daae1e;
 }
 
 .btn-secondary:hover {
-  background-color: #f0c14b;
-  color: #111;
+  color: #c88b21;
+ 
 }
 
 .hero-features {
@@ -69,7 +69,7 @@
   padding: 0;
   margin: 0;
   font-size: 1.1rem;
-  color: #ddd;
+  color: #c88b21;
 }
 
 .hero-features li {
@@ -99,7 +99,7 @@
 .hero-testimonials blockquote {
   font-style: italic;
   margin-bottom: 1rem;
-  color: #ddd;
+  color: #f0c14b;
   border-left: 4px solid #f0c14b;
   padding-left: 1rem;
 }
@@ -108,7 +108,7 @@
   display: block;
   margin-top: 0.5rem;
   font-weight: 600;
-  color: #bbb;
+  color: #f0c14b;
 }
 
 .hero-image-container {
@@ -120,7 +120,7 @@
   width: 100%;
   border-radius: 8px;
   object-fit: cover;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+
 }
 
 /* Responsive adjustments */

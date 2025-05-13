@@ -1,23 +1,17 @@
-// LogOut.jsx
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const LogOut = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleLogout = () => {
     // Clear authentication data
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('userType');
     sessionStorage.clear();
 
-    // Determine user type based on the previous route and redirect
-    const userType = location.state?.userType;
-    if (userType === 'administrator') {
-      navigate('/login', { state: { userType: 'administrator' } });
-    } else {
-      navigate('/login', { state: { userType: 'client' } });
-    }
+    // Redirect to login page
+    navigate('/login');
   };
 
   return (

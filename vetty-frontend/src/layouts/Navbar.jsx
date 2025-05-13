@@ -10,7 +10,8 @@ const Navbar = ({ isLoggedIn }) => {
   const showNav = ['/home', '/products', '/about', '/services', '/logout'].includes(location.pathname);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // Remove the auth token
+    localStorage.removeItem('token'); // Remove the auth token
+    localStorage.removeItem('userType'); // Remove the userType
     sessionStorage.clear(); // Clear session storage
     navigate('/login'); // Redirect to the client login page without state
   };
