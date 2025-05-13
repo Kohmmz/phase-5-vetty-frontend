@@ -1,4 +1,3 @@
-// frontend/src/redux/authActions.js
 import axios from 'axios';
 import { setAuthToken, logout as logoutAuthSliceAction } from './authSlice'; // Import logout action from authSlice
 import { setAuthError, clearAuthError } from './errorSlice';
@@ -110,6 +109,24 @@ export const resetPasswordWithToken = (token, newPassword, navigate) => async (d
             dispatch(setAuthError(error.response.data.error));
         } else {
             dispatch(setAuthError('Password reset failed. Please try again.'));
+        }
+    }
+};
+
+// New action to send password reset verification code email
+export const sendPasswordResetVerificationCode = (email) => async (dispatch) => {
+    try {
+        const response = await axios.post(`${baseUrl}/users/password-reset-request`, { email });
+        if (response.data.message === 'Password reset email sent.') {
+            alert('Verification code sent to your email.');
+        } else {
+            dispatch(setAuthError('Failed to send verification code. Please try again.'));
+        }
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.error) {
+            dispatch(setAuthError(error.response.data.error));
+        } else {
+            dispatch(setAuthError('Failed to send verification code. Please try again.'));
         }
     }
 };

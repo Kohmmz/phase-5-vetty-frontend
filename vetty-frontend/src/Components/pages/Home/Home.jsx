@@ -94,44 +94,43 @@ const HomePage = () => {
       <Hero />
       {/* Featured Categories */}
       <section className="featured-categories">
+        {/* Content of the section */}
+      </section>
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="category-card">
-              <Link to="/products?category=food">
-                <img src={petFoodImg} alt="Pet Food" />
-                <div className="p-4">
-                  <h3>Pet Food</h3>
-                  <p>Keep your furry friends nourished and happy.</p>
+          <div className="categories-grid">
+            {[petFoodImg, healthWellnessImg, groomingServicesImg, vaccinationServicesImg].map((img, index) => {
+              const titles = ['Pet Food', 'Health & Wellness', 'Grooming Services', 'Vaccination Services'];
+              const descriptions = [
+                'Keep your furry friends nourished and happy.',
+                "Essential items for your pet's well-being.",
+                'Pamper your pet with our professional grooming.',
+                'Protect your pet with our vaccination options.'
+              ];
+              const links = [
+                '/products?category=food',
+                '/products?category=health',
+                '/services?type=grooming',
+                '/services?type=vaccination'
+              ];
+                return (
+                <div key={index} className="category-card star-border">
+                  <Link to={links[index]}>
+                  <div className="star-wrapper"></div>
+                      <img src={img} alt={titles[index]} />
+                      <div className="star-icon-top-left">★</div>
+                      <div className="star-icon-top-right">★</div>
+                      <div className="star-icon-bottom-left">★</div>
+                      <div className="star-icon-bottom-right">★</div>
+                    <div className="category-info">
+                      <h3>{titles[index]}</h3>
+                      <p>{descriptions[index]}</p>
+                      <div className="star-icon-below">★</div>
+                    </div>
+                  </Link>
                 </div>
-              </Link>
-            </div>
-            <div className="category-card">
-              <Link to="/products?category=health">
-                <img src={healthWellnessImg} alt="Health & Wellness" />
-                <div className="p-4">
-                  <h3>Health & Wellness</h3>
-                  <p>Essential items for your pet's well-being.</p>
-                </div>
-              </Link>
-            </div>
-            <div className="category-card">
-              <Link to="/services?type=grooming">
-                <img src={groomingServicesImg} alt="Grooming Services" />
-                <div className="p-4">
-                  <h3>Grooming Services</h3>
-                  <p>Pamper your pet with our professional grooming.</p>
-                </div>
-              </Link>
-            </div>
-            <div className="category-card">
-              <Link to="/services?type=vaccination">
-                <img src={vaccinationServicesImg} alt="Vaccination Services" />
-                <div className="p-4">
-                  <h3>Vaccination Services</h3>
-                  <p>Protect your pet with our vaccination options.</p>
-                </div>
-              </Link>
-            </div>
+              );
+            })}
+          </div>
 
             <div className="category-card">
               <Link to="/products?category=bird-food">
@@ -334,8 +333,7 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-      </section>
-    </div>
+
   );
 };
 

@@ -1,6 +1,6 @@
 .home-page-container {
   min-height: 100vh;
-  background-color:white; /* light gray background for subtle contrast */
+  background-color: white;
   margin-top: 3rem;
   padding: 1rem 2rem 3rem 2rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,7 +21,7 @@ h2 {
   font-weight: 700;
   color: #222;
   margin-bottom: 1.5rem;
-  border-bottom: 3px solid white; /* Amazon yellow underline */
+  border-bottom: 3px solid white;
   padding-bottom: 0.5rem;
   max-width: fit-content;
   margin-left: auto;
@@ -29,10 +29,9 @@ h2 {
 }
 
 .featured-categories {
-  background-color:white;
+  background-color: white;
   padding: 2rem;
   border-radius: 8px;
- 
   max-width: 100%;
   margin-left: 0;
   margin-right: 0;
@@ -60,6 +59,7 @@ h2 {
   flex-direction: column;
   text-align: center;
   width: 100%;
+  position: relative;
 }
 
 .category-card:hover {
@@ -74,6 +74,7 @@ h2 {
   border-bottom: 1px solid white;
   flex-shrink: 0;
   transition: transform 0.3s ease;
+  position: relative;
 }
 
 .category-card:hover img {
@@ -86,6 +87,7 @@ h2 {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
 }
 
 .category-info h3 {
@@ -105,6 +107,57 @@ h2 {
 .service-icon {
   font-size: 2.5rem;
   color: #e59513;
+}
+
+/* Star icon styles */
+.star-border {
+  border: 2px solid #f0c14b;
+  box-shadow: 0 0 10px #f0c14b;
+}
+
+.star-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.star-icon-top-left,
+.star-icon-top-right,
+.star-icon-bottom-left,
+.star-icon-bottom-right {
+  position: absolute;
+  color: #f0c14b;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-shadow: 0 0 3px #dba017;
+}
+
+.star-icon-top-left {
+  top: 5px;
+  left: 5px;
+}
+
+.star-icon-top-right {
+  top: 5px;
+  right: 5px;
+}
+
+.star-icon-bottom-left {
+  bottom: 5px;
+  left: 5px;
+}
+
+.star-icon-bottom-right {
+  bottom: 5px;
+  right: 5px;
+}
+
+.star-icon-below {
+  color: #f0c14b;
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+  text-align: center;
+  text-shadow: 0 0 5px #dba017;
 }
 
 /* Responsive adjustments */
