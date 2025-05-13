@@ -8,10 +8,10 @@ const Hero = () => {
         <h1 className="hero-title">Welcome to Vetty</h1>
         <p className="hero-subtitle">Everything your pet needs, delivered fast</p>
         <div className="hero-buttons">
-          <button className="btn-primary" onClick={() => window.location.href = '/products'}>
+          <button className="btn-primary" onClick={() => window.location.href = 'https://phase-5-vetty-frontend.vercel.app/products'}>
             Shop Now
           </button>
-          <button className="btn-secondary" onClick={() => window.location.href = '/services'}>
+          <button className="btn-secondary" onClick={() => window.location.href = 'https://phase-5-vetty-frontend.vercel.app/services'}>
             Our Services
           </button>
         </div>
