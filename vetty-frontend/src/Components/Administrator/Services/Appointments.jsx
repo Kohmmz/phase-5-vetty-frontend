@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import dayjs from 'dayjs';
-import api from '../api/api';
+import api from '../../api/api';
 import './Appointments.css';
 
 const Appointments = () => {
