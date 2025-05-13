@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import './OrdersManagement.css';
@@ -10,6 +11,7 @@ import api from '../../api/api';
 
 const OrderManagement = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { orders, loading, error } = useSelector((state) => state.orders);
   const products = useSelector(selectAllProducts);
   const services = useSelector(selectAllServices);
@@ -23,9 +25,6 @@ const OrderManagement = () => {
   const [editQuantity, setEditQuantity] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
-
-  // New state for viewing order items modal
-  const [viewingOrderId, setViewingOrderId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchOrders());
@@ -141,7 +140,7 @@ const OrderManagement = () => {
 
       <div className="space-y-4">
         {orders.map((order) => (
-          <Card key={order.id} className="shadow-md">
+          <Card key={order.id} className="shadow-md p-4 rounded-lg border border-gray-300">
             <div className="flex justify-between">
               <div>
                 <h3 className="font-semibold text-blue-900">Order #{order.id}</h3>
@@ -219,20 +218,7 @@ const OrderManagement = () => {
                       })}
                     </ul>
                   ) : (
-                    <div className="flex flex-wrap gap-4 mt-2">
-                      {products.map((product) => (
-                        <div key={`product-${product.id}`} className="flex flex-col items-center w-24">
-                          <img src={product.image} alt={product.name} className="w-16 h-16 object-cover rounded" />
-                          <p className="text-xs text-center mt-1">{product.name}</p>
-                        </div>
-                      ))}
-                      {services.map((service) => (
-                        <div key={`service-${service.id}`} className="flex flex-col items-center w-24">
-                          <img src={service.image_url} alt={service.name} className="w-16 h-16 object-cover rounded" />
-                          <p className="text-xs text-center mt-1">{service.name}</p>
-                        </div>
-                      ))}
-                    </div>
+                    <p>No order items found.</p>
                   )}
                 </div>
               </div>
@@ -242,7 +228,7 @@ const OrderManagement = () => {
                   <>
                     <Button size="sm" onClick={() => handleApprove(order.id)}>Approve</Button>
                     <Button size="sm" variant="destructive" onClick={() => handleDisapprove(order.id)}>Disapprove</Button>
-                    <Button size="sm" onClick={() => setViewingOrderId(order.id)}>View</Button>
+                    <Button size="sm" onClick={() => navigate(`/admin/orders/${order.id}`)}>View</Button>
                   </>
                 )}
               </div>
@@ -250,59 +236,6 @@ const OrderManagement = () => {
           </Card>
         ))}
       </div>
-
-      {viewingOrderId && (
-        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="modal-content bg-white p-6 rounded shadow-lg max-w-lg w-full max-h-[80vh] overflow-auto">
-            <h3 className="text-lg font-semibold mb-4">Order Items for Order #{viewingOrderId}</h3>
-            <button
-              className="mb-4 px-3 py-1 bg-red-600 text-white rounded"
-              onClick={() => setViewingOrderId(null)}
-            >
-              Close
-            </button>
-            <ul>
-              {orderItemsMap[viewingOrderId] && orderItemsMap[viewingOrderId].length > 0 ? (
-                orderItemsMap[viewingOrderId].map((item) => {
-                  let product = null;
-                  let service = null;
-                  if (item.product_id) {
-                    product = productMap.get(item.product_id);
-                  }
-                  if (item.service_id) {
-                    service = serviceMap.get(item.service_id);
-                  }
-                  return (
-                    <li key={item.id} className="flex items-center gap-4 my-2 border-b border-gray-300 pb-2">
-                      {product && (
-                        <>
-                          <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded" />
-                          <div>
-                            <p className="font-medium">{product.name}</p>
-                            <p className="text-sm text-gray-600">${product.price}</p>
-                          </div>
-                        </>
-                      )}
-                      {service && (
-                        <>
-                          <img src={service.image_url} alt={service.name} className="w-12 h-12 object-cover rounded" />
-                          <div>
-                            <p className="font-medium">{service.name}</p>
-                            <p className="text-sm text-gray-600">${service.price}</p>
-                          </div>
-                        </>
-                      )}
-                      <p className="text-sm">Quantity: {item.quantity}</p>
-                    </li>
-                  );
-                })
-              ) : (
-                <p>No order items found for this order.</p>
-              )}
-            </ul>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import Card from '../../ui/card';
-import { Button } from '../../ui/buttons';
-import dayjs from 'dayjs';
+import { Pie } from 'react-chartjs-2';
+import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 import api from '../../api/api';
 import './Appointments.css';
+
+Chart.register(ArcElement, Tooltip, Legend);
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -60,84 +61,127 @@ const Appointments = () => {
     setLoading(false);
   };
 
-  // Helper to get service details by service_id
   const getServiceById = (service_id) => {
     return services.find((service) => service.id === service_id);
   };
 
+  // Prepare data for pie chart
+  const statusCounts = appointments.reduce(
+    (acc, appt) => {
+      acc[appt.status] = (acc[appt.status] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
+
+  const pieData = {
+    labels: ['Approved', 'Pending', 'Disapproved'],
+    datasets: [
+      {
+        data: [
+          statusCounts['approved'] || 0,
+          statusCounts['pending'] || 0,
+          statusCounts['disapproved'] || 0,
+        ],
+        backgroundColor: ['#22c55e', '#fbbf24', '#ef4444'],
+        hoverBackgroundColor: ['#16a34a', '#ca8a04', '#dc2626'],
+      },
+    ],
+  };
+
   return (
-    <div className="p-4">
-      <div className="flex justify-between mb-4 items-center">
-        <h2 className="text-xl font-bold text-blue-800">Appointments</h2>
+    <div className="appointments-container">
+      <div className="appointments-header">
+        <h2 className="appointments-title">Appointments</h2>
         <div className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-          Pending: {appointments.filter((a) => a.status === 'pending').length}
+          Pending: {statusCounts['pending'] || 0}
         </div>
       </div>
 
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-600">{error}</p>}
 
-      <div className="space-y-4">
-        {appointments.map((appt) => {
-          const service = getServiceById(appt.service_id);
-          return (
-            <Card key={appt.id} className="shadow-md">
-              <div className="flex justify-between">
-                <div className="flex items-center gap-4">
-                  {service && (
-                    <img
-                      src={service.image_url}
-                      alt={service.name}
-                      className="w-24 h-24 object-cover rounded-md"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-blue-900">{appt.client || appt.user_id}</h3>
-                    {service && (
-                      <>
-                        <p className="text-sm text-gray-600">Service: {service.name}</p>
-                        <p className="text-sm text-gray-600">Category: {service.category || 'N/A'}</p>
-                        <p className="text-sm text-gray-600">Duration: {service.duration || 'N/A'}</p>
-                        <p className="text-sm">{service.description}</p>
-                      </>
-                    )}
-                    {!service && <p className="text-sm">Service ID: {appt.service_id}</p>}
-                    <p className="text-sm">Date & Time: {dayjs(appt.appointment_time).format('MMM D, YYYY [at] h:mm A')}</p>
-                    <p className="text-sm">
-                      Status:{' '}
-                      <span
-                        className={`font-medium ${
-                          appt.status === 'approved'
-                            ? 'text-green-600'
-                            : appt.status === 'disapproved'
-                            ? 'text-red-600'
-                            : 'text-yellow-600'
-                        }`}
-                      >
-                        {appt.status.charAt(0).toUpperCase() + appt.status.slice(1)}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                {appt.status === 'pending' && (
-                  <div className="flex flex-col gap-2 justify-center items-end">
-                    <Button size="sm" onClick={() => handleApprove(appt.id)}>
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDecline(appt.id)}
-                    >
-                      Decline
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </Card>
-          );
-        })}
+      <div style={{ maxWidth: '400px', marginBottom: '1rem' }}>
+        <Pie data={pieData} />
       </div>
+
+      <table className="appointments-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#1e40af', color: 'white' }}>
+            <th style={{ padding: '8px', border: '1px solid #ddd' }}>Client</th>
+            <th style={{ padding: '8px', border: '1px solid #ddd' }}>Service</th>
+            <th style={{ padding: '8px', border: '1px solid #ddd' }}>Category</th>
+            <th style={{ padding: '8px', border: '1px solid #ddd' }}>Duration</th>
+            <th style={{ padding: '8px', border: '1px solid #ddd' }}>Date & Time</th>
+            <th style={{ padding: '8px', border: '1px solid #ddd' }}>Status</th>
+            <th style={{ padding: '8px', border: '1px solid #ddd' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {appointments.map((appt) => {
+            const service = getServiceById(appt.service_id);
+            return (
+              <tr key={appt.id} style={{ borderBottom: '1px solid #ddd' }}>
+                <td style={{ padding: '8px', border: '1px solid #ddd' }}>{appt.client || appt.user_id}</td>
+                <td style={{ padding: '8px', border: '1px solid #ddd' }}>{service ? service.name : 'N/A'}</td>
+                <td style={{ padding: '8px', border: '1px solid #ddd' }}>{service ? service.category || 'N/A' : 'N/A'}</td>
+                <td style={{ padding: '8px', border: '1px solid #ddd' }}>{service ? service.duration || 'N/A' : 'N/A'}</td>
+                <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                  {new Date(appt.appointment_time).toLocaleString()}
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                  <span
+                    style={{
+                      color:
+                        appt.status === 'approved'
+                          ? '#22c55e'
+                          : appt.status === 'disapproved'
+                          ? '#ef4444'
+                          : '#fbbf24',
+                      fontWeight: '600',
+                    }}
+                  >
+                    {appt.status.charAt(0).toUpperCase() + appt.status.slice(1)}
+                  </span>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                  {appt.status === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => handleApprove(appt.id)}
+                        style={{
+                          marginRight: '0.5rem',
+                          padding: '4px 8px',
+                          backgroundColor: '#22c55e',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleDecline(appt.id)}
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Decline
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };

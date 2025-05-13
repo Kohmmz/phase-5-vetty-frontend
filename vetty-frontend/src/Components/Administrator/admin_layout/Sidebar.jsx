@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Box, ClipboardList, History, Home, Layers, ShoppingBag } from 'lucide-react';
+import { FaSignOutAlt } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
+import { performLogout } from '../../../redux/authActions';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [notificationCount, setNotificationCount] = useState(0); // Notifications removed
 
   const navItems = [
@@ -16,6 +21,12 @@ const Sidebar = ({ isOpen, onClose }) => {
     { label: 'Purchase History', icon: <History />, path: '/admin/purchase-history' },
     // Notifications removed
   ];
+
+  const handleLogout = () => {
+    dispatch(performLogout());
+    navigate('/login');
+    if (onClose) onClose();
+  };
 
   return (
     <div className={`bg-blue-600 text-white w-64 transition-all duration-300 ${isOpen ? 'block' : 'hidden'} md:block`}>
@@ -40,6 +51,18 @@ const Sidebar = ({ isOpen, onClose }) => {
             </div>
           </Link>
         ))}
+        <button
+          onClick={handleLogout}
+          className="relative flex items-center justify-between p-2 rounded hover:bg-blue-500 w-full mt-4 text-left"
+          type="button"
+        >
+          <div className="relative flex items-center gap-2">
+            <div className="relative">
+              <FaSignOutAlt />
+            </div>
+            <span>Logout</span>
+          </div>
+        </button>
       </nav>
     </div>
   );
