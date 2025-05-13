@@ -76,7 +76,7 @@ const OrderManagement = () => {
 
   const startEditingStatus = (order) => {
     setEditingStatusOrderId(order.id);
-    setEditStatusValue(order.status);
+    setEditStatusValue(order.status || '');
     setStatusUpdateError(null);
   };
 
@@ -102,8 +102,8 @@ const OrderManagement = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold text-blue-800 mb-4">Order Management</h2>
+    <div className="orders-management-container">
+      <h2 className="orders-management-title">Order Management</h2>
 
       {loading && <p>Loading orders...</p>}
       {error && <p className="text-red-600">{error}</p>}
@@ -113,94 +113,94 @@ const OrderManagement = () => {
 
       {statusUpdateError && <p className="text-red-600">{statusUpdateError}</p>}
 
-      <div className="space-y-4">
+      <div className="orders-list">
         {orders.map((order) => (
-          <Card key={order.id} className="shadow-md p-4 rounded-lg border border-gray-300">
-            <div className="flex justify-between">
-              <div>
-                <h3 className="font-semibold text-blue-900">Order #{order.id}</h3>
-                <p className="text-sm text-gray-600">Customer: {order.user_id}</p>
-                <p className="text-sm">Total: ${order.total_price}</p>
-                <p className="text-sm">
-                  Status:{' '}
-                  {editingStatusOrderId === order.id ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editStatusValue}
-                        onChange={(e) => setEditStatusValue(e.target.value)}
-                        disabled={statusUpdating}
-                        className="border rounded px-2 py-1"
-                      />
+          <Card key={order.id} className="order-card">
+            <div className="order-header">
+              <div className="order-info">
+                <h3>Order #{order.id}</h3>
+                <p>Customer: {order.user_id}</p>
+                <p>Total: ${order.total_price}</p>
+              </div>
+              <div className="order-status">
+                Status:{' '}
+                {editingStatusOrderId === order.id ? (
+                  <>
+                    <input
+                      type="text"
+                      value={editStatusValue}
+                      onChange={(e) => setEditStatusValue(e.target.value)}
+                      disabled={statusUpdating}
+                      className="status-edit-input"
+                    />
+                    <div className="status-edit-buttons">
                       <Button size="sm" onClick={saveStatusEdit} disabled={statusUpdating}>
                         {statusUpdating ? 'Saving...' : 'Save'}
                       </Button>
                       <Button size="sm" variant="destructive" onClick={cancelEditingStatus} disabled={statusUpdating}>
                         Cancel
                       </Button>
-                    </>
-                  ) : (
-                    <>
-                      <span className={order.status === 'approved' ? 'text-green-600' : 'text-red-600'}>
-                        {order.status}
-                      </span>{' '}
-                      <Button size="sm" onClick={() => startEditingStatus(order)}>Edit</Button>
-                    </>
-                  )}
-                </p>
-                <div className="mt-2">
-                  <h4 className="font-semibold">Order Items:</h4>
-                  {orderItemsMap[order.id] && orderItemsMap[order.id].length > 0 ? (
-                    <ul>
-                      {orderItemsMap[order.id].map((item) => {
-                        let product = null;
-                        let service = null;
-                        if (item.product_id) {
-                          product = productMap.get(item.product_id);
-                        }
-                        if (item.service_id) {
-                          service = serviceMap.get(item.service_id);
-                        }
-                        return (
-                          <li key={item.id} className="flex items-center gap-4 my-2">
-                            {product && (
-                              <>
-                                <img src={product.image_url} alt={product.name} className="w-12 h-12 object-cover rounded" />
-                                <div>
-                                  <p className="font-medium">{product.name}</p>
-                                  <p className="text-sm text-gray-600">${product.price}</p>
-                                  <p className="text-sm">{product.description}</p>
-                                </div>
-                              </>
-                            )}
-                            {service && (
-                              <>
-                                <img src={service.image_url} alt={service.name} className="w-12 h-12 object-cover rounded" />
-                                <div>
-                                  <p className="font-medium">{service.name}</p>
-                                  <p className="text-sm text-gray-600">${service.price}</p>
-                                  <p className="text-sm">{service.description}</p>
-                                </div>
-                              </>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <p>No order items found.</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 justify-center items-end">
-                {order.status !== 'approved' && (
+                    </div>
+                  </>
+                ) : (
                   <>
-                    <Button size="sm" onClick={() => handleApprove(order.id)}>Approve</Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDisapprove(order.id)}>Disapprove</Button>
+                    <span className={`status-${order.status.toLowerCase()}`}>
+                      {order.status}
+                    </span>{' '}
+                    <Button size="sm" onClick={() => startEditingStatus(order)}>Edit</Button>
                   </>
                 )}
               </div>
+            </div>
+
+            <div className="order-items">
+              {orderItemsMap[order.id] && orderItemsMap[order.id].length > 0 ? (
+                orderItemsMap[order.id].map((item) => {
+                  let product = null;
+                  let service = null;
+                  if (item.product_id) {
+                    product = productMap.get(item.product_id);
+                  }
+                  if (item.service_id) {
+                    service = serviceMap.get(item.service_id);
+                  }
+                  return (
+                    <div key={item.id} className="order-item">
+                      {product && (
+                        <>
+                          <img src={product.image_url} alt={product.name} />
+                          <div className="order-item-details">
+                            <p className="order-item-name">{product.name}</p>
+                            <p className="order-item-price">${product.price}</p>
+                            <p className="order-item-description">{product.description}</p>
+                          </div>
+                        </>
+                      )}
+                      {service && (
+                        <>
+                          <img src={service.image_url} alt={service.name} />
+                          <div className="order-item-details">
+                            <p className="order-item-name">{service.name}</p>
+                            <p className="order-item-price">${service.price}</p>
+                            <p className="order-item-description">{service.description}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <p>No order items found.</p>
+              )}
+            </div>
+
+            <div className="order-actions">
+              {order.status !== 'approved' && (
+                <>
+                  <Button size="sm" className="button-approve" onClick={() => handleApprove(order.id)}>Approve</Button>
+                  <Button size="sm" variant="destructive" className="button-disapprove" onClick={() => handleDisapprove(order.id)}>Disapprove</Button>
+                </>
+              )}
             </div>
           </Card>
         ))}
