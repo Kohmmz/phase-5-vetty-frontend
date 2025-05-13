@@ -16,6 +16,10 @@ Vetty is a full-stack e-commerce application designed to provide veterinary serv
 
 ### Admin Features
 - Admin login and authentication.
+- To access Admin Dashboard
+- Admin Credentials include:
+  email:victorkihiko211@gmail.com
+  password:victor123
 - Add, update, and delete veterinary services and products.
 - Approve or disapprove service requests and product orders.
 - View purchase and service request history.
@@ -70,7 +74,7 @@ Vetty is a full-stack e-commerce application designed to provide veterinary serv
    ```
    npm run dev
    ```
-4. Access the app at `http://localhost:3000`.
+4. Access the app at `http://localhost:5173`.
 
 ### Backend
 - The backend is a Flask API service (separate repository).
