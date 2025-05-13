@@ -3,6 +3,8 @@ import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import './ServiceRequestManagement.css';
 
+const BASE_API_URL = 'https://backend-testing-main.onrender.com';
+
 const ServiceRequestManagement = () => {
   const [serviceRequests, setServiceRequests] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -13,7 +15,7 @@ const ServiceRequestManagement = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/service_requests/', {
+      const response = await fetch(`${BASE_API_URL}/service_requests/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Failed to fetch service requests');
@@ -34,7 +36,7 @@ const ServiceRequestManagement = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const url = `/service_requests/${id}/status`;
+      const url = `${BASE_API_URL}/service_requests/${id}/status`;
       const statusValue = action === 'approve' ? 'approved' : 'disapproved';
       const response = await fetch(url, {
         method: 'PUT',

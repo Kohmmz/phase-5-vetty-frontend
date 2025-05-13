@@ -10,44 +10,61 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import api from '../../api/api';  // Import axios instance
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const PurchaseHistory = () => {
   const [users, setUsers] = useState([]);
-  const [payments, setPayments] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [loadingPayments, setLoadingPayments] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
     setError(null);
     try {
-      const response = await api.get('/admin/users');  // Use axios instance with baseURL
-      setUsers(response.data);
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://backend-testing-main.onrender.com/admin/users', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      setUsers(data);
     } catch (err) {
       setError(err.message);
     }
     setLoadingUsers(false);
   };
 
-  const fetchPayments = async () => {
-    setLoadingPayments(true);
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
     setError(null);
     try {
-      const response = await api.get('/payments/all');  // Fetch all payments from backend
-      setPayments(response.data);
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://backend-testing-main.onrender.com/admin/orders', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+      const data = await response.json();
+      setOrders(data);
     } catch (err) {
       setError(err.message);
     }
-    setLoadingPayments(false);
+    setLoadingOrders(false);
   };
 
   useEffect(() => {
     fetchUsers();
-    fetchPayments();
+    fetchOrders();
   }, []);
 
   // Map user id to username for label display
@@ -56,9 +73,9 @@ const PurchaseHistory = () => {
     return acc;
   }, {});
 
-  // Sum amount per user from payments
-  const totalPaidByUser = payments.reduce((acc, payment) => {
-    acc[payment.user_id] = (acc[payment.user_id] || 0) + payment.amount;
+  // Sum total_price per user
+  const totalPaidByUser = orders.reduce((acc, order) => {
+    acc[order.user_id] = (acc[order.user_id] || 0) + order.total_price;
     return acc;
   }, {});
 
@@ -99,7 +116,7 @@ const PurchaseHistory = () => {
 
   return (
     <div style={{ width: '80%', margin: 'auto', paddingTop: '20px' }}>
-      {loadingUsers || loadingPayments ? (
+      {loadingUsers || loadingOrders ? (
         <p>Loading data...</p>
       ) : error ? (
         <p className="text-red-600">{error}</p>

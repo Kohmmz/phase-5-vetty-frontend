@@ -4,8 +4,7 @@ import { Button } from '../../ui/buttons';
 import dayjs from 'dayjs';
 import './Appointments.css';
 
-const SERVICE_REQUESTS_API = 'https://backend-testing-main.onrender.com/service_requests';
-const SERVICES_API = 'https://backend-testing-main.onrender.com/services';
+const BASE_API_URL = 'https://backend-testing-main.onrender.com';
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -17,7 +16,7 @@ const Appointments = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${SERVICE_REQUESTS_API}/`, {
+      const response = await fetch(`${BASE_API_URL}/service_requests/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Failed to fetch appointments');
@@ -31,7 +30,7 @@ const Appointments = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch(SERVICES_API);
+      const response = await fetch(`${BASE_API_URL}/services`);
       if (!response.ok) throw new Error('Failed to fetch services');
       const data = await response.json();
       setServices(data);
@@ -50,9 +49,13 @@ const Appointments = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://backend-testing-main.onrender.com/admin/service_requests/${id}/approve`, {
+      const response = await fetch(`${BASE_API_URL}/service_requests/${id}/status`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ status: 'approved' }),
       });
       if (!response.ok) throw new Error('Failed to approve appointment');
       await fetchAppointments();
@@ -67,9 +70,13 @@ const Appointments = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://backend-testing-main.onrender.com/admin/service_requests/${id}/disapprove`, {
+      const response = await fetch(`${BASE_API_URL}/service_requests/${id}/status`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ status: 'disapproved' }),
       });
       if (!response.ok) throw new Error('Failed to decline appointment');
       await fetchAppointments();
