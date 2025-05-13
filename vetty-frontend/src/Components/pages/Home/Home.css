@@ -1,6 +1,6 @@
 .home-page-container {
   min-height: 100vh;
-  background-color: #ec991b; /* light gray background for subtle contrast */
+  background-color:white; /* light gray background for subtle contrast */
   margin-top: 3rem;
   padding: 1rem 2rem 3rem 2rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,7 +21,7 @@ h2 {
   font-weight: 700;
   color: #222;
   margin-bottom: 1.5rem;
-  border-bottom: 3px solid #febd69; /* Amazon yellow underline */
+  border-bottom: 3px solid white; /* Amazon yellow underline */
   padding-bottom: 0.5rem;
   max-width: fit-content;
   margin-left: auto;
@@ -29,7 +29,7 @@ h2 {
 }
 
 .featured-categories {
-  background-color: #e6ae08;
+  background-color:white;
   padding: 2rem;
   border-radius: 8px;
  
@@ -49,10 +49,10 @@ h2 {
 }
 
 .category-card {
-  border: 1px solid #d8a611;
+  border: 1px solid white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-  background-color: #b98610;
+  background-color: white;
   overflow: hidden;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
   cursor: pointer;
@@ -71,7 +71,7 @@ h2 {
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-bottom: 1px solid hsl(44, 88%, 35%);
+  border-bottom: 1px solid white;
   flex-shrink: 0;
   transition: transform 0.3s ease;
 }

@@ -3,16 +3,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaSignOutAlt } from 'react-icons/fa'; // Importing the logout icon
 import ShoppingCartIcon from '../Components/ShoppingCartIcon';
 import './Navbar.css';
+import { useDispatch } from 'react-redux';
+import { performLogout } from '../redux/authActions';
 
 const Navbar = ({ isLoggedIn }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const showNav = ['/home', '/products', '/about', '/services', '/logout'].includes(location.pathname);
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Remove the auth token
-    localStorage.removeItem('userType'); // Remove the userType
-    sessionStorage.clear(); // Clear session storage
+    dispatch(performLogout());
     navigate('/login'); // Redirect to the client login page without state
   };
 
