@@ -25,7 +25,7 @@ const PurchaseHistory = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://backend-testing-main.onrender.com/admin/users', {
+      const response = await fetch('/api/admin/users', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -46,7 +46,7 @@ const PurchaseHistory = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://backend-testing-main.onrender.com/admin/orders', {
+      const response = await fetch('/api/admin/orders', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

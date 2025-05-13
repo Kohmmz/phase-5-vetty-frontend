@@ -3,8 +3,8 @@ import Card from '../../ui/card';
 import dayjs from 'dayjs';
 import './ServiceHistory.css';
 
-const SERVICE_REQUESTS_API = 'https://backend-testing-main.onrender.com/service_requests';
-const SERVICES_API = 'https://backend-testing-main.onrender.com/services';
+const SERVICE_REQUESTS_API = '/api/service_requests';
+const SERVICES_API = '/api/services';
 
 const ServiceHistory = () => {
   const [serviceHistory, setServiceHistory] = useState([]);

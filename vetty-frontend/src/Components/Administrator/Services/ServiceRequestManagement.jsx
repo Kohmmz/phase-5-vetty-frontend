@@ -3,7 +3,7 @@ import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import './ServiceRequestManagement.css';
 
-const BASE_API_URL = 'https://backend-testing-main.onrender.com';
+const BASE_API_URL = '/api';
 
 const ServiceRequestManagement = () => {
   const [serviceRequests, setServiceRequests] = useState([]);

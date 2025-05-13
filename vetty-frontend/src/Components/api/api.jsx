@@ -1,6 +1,6 @@
 import axios from 'axios';
 // import checkout from './checkout';
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://backend-testing-5o8c.onrender.com';
+const API_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const api = axios.create({
   baseURL: API_URL,

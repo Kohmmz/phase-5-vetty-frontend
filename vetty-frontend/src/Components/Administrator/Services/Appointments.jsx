@@ -4,7 +4,7 @@ import { Button } from '../../ui/buttons';
 import dayjs from 'dayjs';
 import './Appointments.css';
 
-const BASE_API_URL = 'https://backend-testing-main.onrender.com';
+const BASE_API_URL = '/api';
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
