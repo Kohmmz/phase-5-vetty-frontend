@@ -60,7 +60,7 @@ const About = () => {
       </div>
 
       <div className="about-image">
-        <img src="https://www.istockphoto.com/photo/dog-at-the-veterinarian-gm2025553056-561696714?utm_campaign=srp_photos_bottom&utm_content=https%3A%2F%2Funsplash.com%2Fs%2Fphotos%2Fveterinarian&utm_medium=affiliate&utm_source=unsplash&utm_term=veterinarian%3A%3A%3A" alt="About Vetty" />
+        <img src="https://media.istockphoto.com/id/1832795616/photo/woman-veterinarian-is-with-dog-in-the-clinic.webp?a=1&b=1&s=612x612&w=0&k=20&c=ZLTyrWL034O_pbsvHnL6fXGLp3TTaMUJhHbOiG4YD3o=" alt="About Vetty" />
       </div>
 
       <div className="mission-container">
