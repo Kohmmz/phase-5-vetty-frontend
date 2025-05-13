@@ -98,14 +98,44 @@ const HomePage = () => {
       </section>
         <div className="container mx-auto">
           <div className="categories-grid">
-            {[petFoodImg, healthWellnessImg, groomingServicesImg, vaccinationServicesImg].map((img, index) => {
-              const titles = ['Pet Food', 'Health & Wellness', 'Grooming Services', 'Vaccination Services'];
-              const descriptions = [
-                'Keep your furry friends nourished and happy.',
-                "Essential items for your pet's well-being.",
-                'Pamper your pet with our professional grooming.',
-                'Protect your pet with our vaccination options.'
-              ];
+            {
+            [
+              petFoodImg, healthWellnessImg, groomingServicesImg, vaccinationServicesImg, 
+ birdFoodImg, 
+ chewDogBallImg, 
+ dogFeedImg, 
+ multiVitaminImg, 
+ petSupplementsImg, 
+ petShampooImg,
+ petWashImg,
+ dentalCareImg, 
+ emergencyKitImg, 
+ surgicalImg, 
+ coolFloorPadImg, 
+ luxuryBedImg,
+ petDispenserImg, 
+ petLeashImg, 
+ petMicrochipImg, 
+ petTrainingImg, 
+ petTravelCarrierImg, 
+
+ petHouseImg, 
+ petSwimmingImg, 
+ petFountainImg 
+ ].map((img, index) => {
+             const titles = [
+        'Bird Food', 'Chew Dog Ball', 'Dog Feed', 'Multivitamin', 'Pet Supplements',
+        'Pet Shampoo', 'Pet Wash', 'Dental Care', 'Emergency Kit', 'Surgical',
+        'Cool Floor Pad', 'Luxury Bed', 'Pet Dispenser', 'Pet Leash', 'Pet Microchip',
+        'Pet Training', 'Pet Travel Carrier', 'Pet House', 'Pet Swimming', 'Pet Fountain'
+          ];
+            const descriptions = [
+          'Nutritious food for birds.', 'Durable chew ball for dogs.', 'High-quality dog feed.', 'Essential multivitamins for pets.', 'Boost pet health with supplements.',
+          'Keep pets clean and fresh.', 'Gentle and effective pet wash.', 'Take care of your pet’s dental hygiene.', 'Emergency care essentials for pets.', 'Surgical needs for pets.',
+          'Cooling comfort for your pet.', 'Luxury bedding for a cozy pet sleep.', 'Convenient pet food dispenser.', 'Strong and reliable pet leash.', 'Microchip for pet identification.',
+          'Effective pet training tools.', 'Safe travel carriers for pets.', 'Comfortable pet housing.', 'Fun swimming accessories for pets.', 'Fresh flowing water for pets.'
+            ];
+             
               const links = [
                 '/products?category=food',
                 '/products?category=health',
