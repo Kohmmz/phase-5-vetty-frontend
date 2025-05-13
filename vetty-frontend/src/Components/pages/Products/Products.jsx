@@ -141,7 +141,7 @@ const Products = () => {
           <h3 className="product-name">{product.name}</h3>
           <p className="product-description">{product.description}</p>
           <div className="flex justify-between items-center">
-            <span className="product-price">${product.price.toFixed(2)}</span>
+            <span className="product-price">KES{product.price.toFixed(2)}</span>
           </div>
         </div>
       </Link>

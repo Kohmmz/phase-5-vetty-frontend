@@ -146,7 +146,7 @@ const Service = () => {
           <h3 className="service-name">{service.name}</h3>
           <p className="service-description">{service.description}</p>
           <div className="flex justify-between items-center">
-            <span className="service-price">${service.price.toFixed(2)}</span>
+            <span className="service-price">KES{service.price.toFixed(2)}</span>
           </div>
         </div>
       </Link>
