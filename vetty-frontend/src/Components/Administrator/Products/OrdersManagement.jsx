@@ -26,6 +26,10 @@ const OrderManagement = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
 
+  // State for updating order status loading and error
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusUpdateError, setStatusUpdateError] = useState(null);
+
   useEffect(() => {
     dispatch(fetchOrders());
     dispatch(fetchProducts());
@@ -111,7 +115,6 @@ const OrderManagement = () => {
       });
       cancelEditing();
     } catch (err) {
-      // Handle non-JSON or unexpected responses gracefully
       if (err.response && err.response.data) {
         if (typeof err.response.data === 'string' && err.response.data.startsWith('<!DOCTYPE')) {
           setUpdateError('Server returned an HTML error page. Please check your authentication and permissions.');
@@ -127,6 +130,22 @@ const OrderManagement = () => {
       setUpdateLoading(false);
     }
   };
+// Handle order status change
+  const handleStatusChange = async (orderId, newStatus) => {
+    setStatusUpdating(true);
+    setStatusUpdateError(null);
+    try {
+      await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
+      // Update local orders state to reflect new status
+      // Since orders come from redux, ideally dispatch an action or refetch orders
+      // For simplicity, refetch orders here
+      dispatch(fetchOrders());
+    } catch (err) {
+      setStatusUpdateError(err.response?.data?.error || err.message || 'Failed to update order status');
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
 
   return (
     <div className="p-4">
@@ -138,6 +157,8 @@ const OrderManagement = () => {
       {loadingItems && <p>Loading order items...</p>}
       {errorItems && <p className="text-red-600">{errorItems}</p>}
 
+      {statusUpdateError && <p className="text-red-600">{statusUpdateError}</p>}
+
       <div className="space-y-4">
         {orders.map((order) => (
           <Card key={order.id} className="shadow-md p-4 rounded-lg border border-gray-300">
@@ -148,9 +169,18 @@ const OrderManagement = () => {
                 <p className="text-sm">Total: ${order.total_price}</p>
                 <p className="text-sm">
                   Status:{' '}
-                  <span className={order.status === 'approved' ? 'text-green-600' : 'text-red-600'}>
-                    {order.status}
-                  </span>
+                  <select
+                    value={order.status}
+                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    disabled={statusUpdating}
+                    className="border rounded px-2 py-1"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="complete">Complete</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="disapproved">Disapproved</option>
+                  </select>
                 </p>
                 <div className="mt-2">
                   <h4 className="font-semibold">Order Items:</h4>
@@ -170,10 +200,11 @@ const OrderManagement = () => {
                           <li key={item.id} className="flex items-center gap-4 my-2">
                             {product && (
                               <>
-                                <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded" />
+                                <img src={product.image_url} alt={product.name} className="w-12 h-12 object-cover rounded" />
                                 <div>
                                   <p className="font-medium">{product.name}</p>
                                   <p className="text-sm text-gray-600">${product.price}</p>
+                                  <p className="text-sm">{product.description}</p>
                                 </div>
                               </>
                             )}
@@ -183,6 +214,7 @@ const OrderManagement = () => {
                                 <div>
                                   <p className="font-medium">{service.name}</p>
                                   <p className="text-sm text-gray-600">${service.price}</p>
+                                  <p className="text-sm">{service.description}</p>
                                 </div>
                               </>
                             )}
@@ -224,13 +256,8 @@ const OrderManagement = () => {
               </div>
 
               <div className="flex flex-col gap-2 justify-center items-end">
-                {order.status !== 'approved' && (
-                  <>
-                    <Button size="sm" onClick={() => handleApprove(order.id)}>Approve</Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDisapprove(order.id)}>Disapprove</Button>
-                    <Button size="sm" onClick={() => navigate(`/admin/orders/${order.id}`)}>View</Button>
-                  </>
-                )}
+                {/* Remove approve/disapprove buttons as status dropdown replaces them */}
+                <Button size="sm" onClick={() => navigate(`/admin/orders/${order.id}`)}>View</Button>
               </div>
             </div>
           </Card>

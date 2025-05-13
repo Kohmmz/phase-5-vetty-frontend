@@ -19,6 +19,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { label: 'Appointments', icon: <ClipboardList />, path: '/admin/appointments' },
     { label: 'Service History', icon: <History />, path: '/admin/service-history' },
     { label: 'Purchase History', icon: <History />, path: '/admin/purchase-history' },
+    { label: 'Logout', icon: <FaSignOutAlt />, isLogout: true },
     // Notifications removed
   ];
 
@@ -32,37 +33,37 @@ const Sidebar = ({ isOpen, onClose }) => {
     <div className={`bg-blue-600 text-white w-64 transition-all duration-300 ${isOpen ? 'block' : 'hidden'} md:block`}>
       <div className="p-4 font-bold text-xl border-b border-blue-400">Admin Panel</div>
       <nav className="p-2">
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            onClick={() => {
-              onClose();
-            }}
-            className={`relative flex items-center justify-between p-2 rounded hover:bg-blue-500 ${
-              location.pathname === item.path ? 'bg-blue-700' : ''
-            }`}
-          >
-            <div className="relative flex items-center gap-2">
-              <div className="relative">
-                {item.icon}
+        {navItems.map((item) =>
+          item.isLogout ? (
+            <button
+              key="logout"
+              onClick={handleLogout}
+              className="relative flex items-center justify-between p-2 rounded hover:bg-blue-500 w-full text-left"
+              type="button"
+            >
+              <div className="relative flex items-center gap-2">
+                <div className="relative text-blue-400">{item.icon}</div>
+                <span>{item.label}</span>
               </div>
-              <span>{item.label}</span>
-            </div>
-          </Link>
-        ))}
-          <button
-          onClick={handleLogout}
-          className="relative flex items-center justify-between p-2 rounded hover:bg-blue-500 w-full mt-4 text-left"
-          type="button"
-        >
-          <div className="relative flex items-center gap-2">
-            <div className="relative text-blue-400">
-              <FaSignOutAlt />
-            </div>
-            <span>Logout</span>
-          </div>
-        </button>
+            </button>
+          ) : (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() => {
+                if (onClose) onClose();
+              }}
+              className={`relative flex items-center justify-between p-2 rounded hover:bg-blue-500 ${
+                location.pathname === item.path ? 'bg-blue-700' : ''
+              }`}
+            >
+              <div className="relative flex items-center gap-2">
+                <div className="relative">{item.icon}</div>
+                <span>{item.label}</span>
+              </div>
+            </Link>
+          )
+        )}
       </nav>
     </div>
   );
