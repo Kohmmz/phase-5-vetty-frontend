@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../../ui/card';
 import dayjs from 'dayjs';
-import api from '../api/api';
+import api from '../../api/api';
 import './ServiceHistory.css';
 
 const ServiceHistory = () => {
