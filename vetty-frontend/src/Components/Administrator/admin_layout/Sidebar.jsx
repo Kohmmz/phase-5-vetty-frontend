@@ -51,13 +51,13 @@ const Sidebar = ({ isOpen, onClose }) => {
             </div>
           </Link>
         ))}
-        <button
+          <button
           onClick={handleLogout}
           className="relative flex items-center justify-between p-2 rounded hover:bg-blue-500 w-full mt-4 text-left"
           type="button"
         >
           <div className="relative flex items-center gap-2">
-            <div className="relative">
+            <div className="relative text-blue-400">
               <FaSignOutAlt />
             </div>
             <span>Logout</span>
