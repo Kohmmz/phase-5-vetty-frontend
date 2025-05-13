@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import dayjs from 'dayjs';
+import api from '../api/api';
 import './Appointments.css';
-
-const BASE_API_URL = '/api';
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -15,13 +14,8 @@ const Appointments = () => {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_API_URL}/service_requests/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Failed to fetch appointments');
-      const data = await response.json();
-      setAppointments(data);
+      const response = await api.get('/service_requests/');
+      setAppointments(response.data);
     } catch (err) {
       setError(err.message);
     }
@@ -30,10 +24,8 @@ const Appointments = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch(`${BASE_API_URL}/services`);
-      if (!response.ok) throw new Error('Failed to fetch services');
-      const data = await response.json();
-      setServices(data);
+      const response = await api.get('/services');
+      setServices(response.data);
     } catch (err) {
       setError(err.message);
     }
@@ -48,16 +40,7 @@ const Appointments = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_API_URL}/service_requests/${id}/status`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ status: 'approved' }),
-      });
-      if (!response.ok) throw new Error('Failed to approve appointment');
+      await api.put(`/service_requests/${id}/status`, { status: 'approved' });
       await fetchAppointments();
     } catch (err) {
       setError(err.message);
@@ -69,16 +52,7 @@ const Appointments = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_API_URL}/service_requests/${id}/status`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ status: 'disapproved' }),
-      });
-      if (!response.ok) throw new Error('Failed to decline appointment');
+      await api.put(`/service_requests/${id}/status`, { status: 'disapproved' });
       await fetchAppointments();
     } catch (err) {
       setError(err.message);

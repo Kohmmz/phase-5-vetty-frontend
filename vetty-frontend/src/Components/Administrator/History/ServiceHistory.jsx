@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../../ui/card';
 import dayjs from 'dayjs';
+import api from '../api/api';
 import './ServiceHistory.css';
-
-const SERVICE_REQUESTS_API = '/api/service_requests';
-const SERVICES_API = '/api/services';
 
 const ServiceHistory = () => {
   const [serviceHistory, setServiceHistory] = useState([]);
@@ -16,13 +14,8 @@ const ServiceHistory = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${SERVICE_REQUESTS_API}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Failed to fetch service history');
-      const data = await response.json();
-      setServiceHistory(data);
+      const response = await api.get('/service_requests/');
+      setServiceHistory(response.data);
     } catch (err) {
       setError(err.message);
     }
@@ -32,10 +25,8 @@ const ServiceHistory = () => {
   const fetchServices = async () => {
     setError(null);
     try {
-      const response = await fetch(SERVICES_API);
-      if (!response.ok) throw new Error('Failed to fetch services');
-      const data = await response.json();
-      setServices(data);
+      const response = await api.get('/services');
+      setServices(response.data);
     } catch (err) {
       setError(err.message);
     }

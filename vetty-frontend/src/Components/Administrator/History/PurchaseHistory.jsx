@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import api from '../api/api';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -24,17 +25,8 @@ const PurchaseHistory = () => {
     setLoadingUsers(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/users', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      const data = await response.json();
-      setUsers(data);
+      const response = await api.get('/admin/users');
+      setUsers(response.data);
     } catch (err) {
       setError(err.message);
     }
@@ -45,17 +37,8 @@ const PurchaseHistory = () => {
     setLoadingOrders(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/orders', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders');
-      }
-      const data = await response.json();
-      setOrders(data);
+      const response = await api.get('/admin/orders');
+      setOrders(response.data);
     } catch (err) {
       setError(err.message);
     }
