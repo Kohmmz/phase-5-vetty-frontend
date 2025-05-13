@@ -96,9 +96,7 @@ const Cart = () => {
       {cartItems.length === 0 ? (
         <div className="empty-cart">
           <p className="empty-cart-message">Your cart is currently empty.</p>
-          <button onClick={() => navigate('/shop')} className="continue-shopping-button">
-            Continue Shopping
-          </button>
+          
         </div>
       ) : (
         <>
