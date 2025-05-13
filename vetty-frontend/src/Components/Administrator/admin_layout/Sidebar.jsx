@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className={`bg-blue-600 text-white w-64 transition-all duration-300 ${isOpen ? 'block' : 'hidden'} md:block`}>
+    <div className={`bg-blue-600 w-64 transition-all duration-300 ${isOpen ? 'block' : 'hidden'} md:block`}>
       <div className="p-4 font-bold text-xl border-b border-blue-400">Admin Panel</div>
       <nav className="p-2">
         {navItems.map((item) =>
@@ -37,7 +37,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <button
               key="logout"
               onClick={handleLogout}
-              className="relative flex items-center justify-between p-2 rounded hover:bg-blue-500 w-full text-left"
+              className="relative flex items-center justify-between p-2 rounded hover:bg-blue-500 "
               type="button"
             >
               <div className="relative flex items-center gap-2">
