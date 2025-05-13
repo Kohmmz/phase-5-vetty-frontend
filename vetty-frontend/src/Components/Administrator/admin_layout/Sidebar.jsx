@@ -37,7 +37,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <button
               key="logout"
               onClick={handleLogout}
-              className="relative flex items-center justify-between p-2 rounded hover:bg-blue-500 "
+              
               type="button"
             >
               <div className="relative flex items-center gap-2">
