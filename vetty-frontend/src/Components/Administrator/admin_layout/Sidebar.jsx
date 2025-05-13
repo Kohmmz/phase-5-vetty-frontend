@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Box, ClipboardList, History, Home, Layers, ShoppingBag } from 'lucide-react';
-import { FaSignOutAlt } from 'react-icons/fa';
+import { Box, ClipboardList, History, Home, Layers, ShoppingBag, LogOut } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { performLogout } from '../../../redux/authActions';
 
@@ -19,7 +18,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { label: 'Appointments', icon: <ClipboardList />, path: '/admin/appointments' },
     { label: 'Service History', icon: <History />, path: '/admin/service-history' },
     { label: 'Purchase History', icon: <History />, path: '/admin/purchase-history' },
-    { label: 'Logout', icon: <FaSignOutAlt />, isLogout: true },
+    { label: 'Logout', icon: <LogOut />, isLogout: true },
     // Notifications removed
   ];
 

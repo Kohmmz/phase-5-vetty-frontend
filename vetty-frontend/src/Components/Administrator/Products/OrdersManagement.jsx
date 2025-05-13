@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import Card from '../../ui/card';
 import { Button } from '../../ui/buttons';
 import './OrdersManagement.css';
@@ -11,7 +10,6 @@ import api from '../../api/api';
 
 const OrderManagement = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { orders, loading, error } = useSelector((state) => state.orders);
   const products = useSelector(selectAllProducts);
   const services = useSelector(selectAllServices);
@@ -19,16 +17,12 @@ const OrderManagement = () => {
   const [orderItemsMap, setOrderItemsMap] = useState({}); // Map orderId -> order items array
   const [loadingItems, setLoadingItems] = useState(false);
   const [errorItems, setErrorItems] = useState(null);
-
-  // New state for editing order items
-  const [editingItem, setEditingItem] = useState(null); // { orderId, itemId }
-  const [editQuantity, setEditQuantity] = useState('');
-  const [updateLoading, setUpdateLoading] = useState(false);
-  const [updateError, setUpdateError] = useState(null);
-
-  // State for updating order status loading and error
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusUpdateError, setStatusUpdateError] = useState(null);
+
+  // State for editing order status
+  const [editingStatusOrderId, setEditingStatusOrderId] = useState(null);
+  const [editStatusValue, setEditStatusValue] = useState('');
 
   useEffect(() => {
     dispatch(fetchOrders());
@@ -36,7 +30,6 @@ const OrderManagement = () => {
     dispatch(fetchServices());
   }, [dispatch]);
 
-  // Fetch order items for all orders after orders are loaded
   useEffect(() => {
     const fetchOrderItemsForOrders = async () => {
       if (!orders || orders.length === 0) {
@@ -58,11 +51,9 @@ const OrderManagement = () => {
         setLoadingItems(false);
       }
     };
-
     fetchOrderItemsForOrders();
   }, [orders]);
 
-  // Create maps for quick lookup of products and services by id
   const productMap = React.useMemo(() => {
     const map = new Map();
     products.forEach((p) => map.set(p.id, p));
@@ -83,63 +74,26 @@ const OrderManagement = () => {
     dispatch(disapproveOrder(id));
   };
 
-  // Start editing an order item
-  const startEditing = (orderId, item) => {
-    setEditingItem({ orderId, itemId: item.id });
-    setEditQuantity(item.quantity ? item.quantity.toString() : '');
-    setUpdateError(null);
+  const startEditingStatus = (order) => {
+    setEditingStatusOrderId(order.id);
+    setEditStatusValue(order.status);
+    setStatusUpdateError(null);
   };
 
-  // Cancel editing
-  const cancelEditing = () => {
-    setEditingItem(null);
-    setEditQuantity('');
-    setUpdateError(null);
+  const cancelEditingStatus = () => {
+    setEditingStatusOrderId(null);
+    setEditStatusValue('');
+    setStatusUpdateError(null);
   };
 
-  // Save updated order item with improved error handling
-  const saveEdit = async () => {
-    if (!editingItem) return;
-    const { orderId, itemId } = editingItem;
-    setUpdateLoading(true);
-    setUpdateError(null);
-    try {
-      const payload = { quantity: parseInt(editQuantity, 10) };
-      const response = await api.put(`/admin/orders/${orderId}/items/${itemId}`, payload);
-      // Update orderItemsMap with updated item
-      setOrderItemsMap((prev) => {
-        const updatedItems = prev[orderId].map((item) =>
-          item.id === itemId ? response.data : item
-        );
-        return { ...prev, [orderId]: updatedItems };
-      });
-      cancelEditing();
-    } catch (err) {
-      if (err.response && err.response.data) {
-        if (typeof err.response.data === 'string' && err.response.data.startsWith('<!DOCTYPE')) {
-          setUpdateError('Server returned an HTML error page. Please check your authentication and permissions.');
-        } else if (err.response.data.error) {
-          setUpdateError(err.response.data.error);
-        } else {
-          setUpdateError('Failed to update order item due to unexpected server response.');
-        }
-      } else {
-        setUpdateError(err.message || 'Failed to update order item');
-      }
-    } finally {
-      setUpdateLoading(false);
-    }
-  };
-// Handle order status change
-  const handleStatusChange = async (orderId, newStatus) => {
+  const saveStatusEdit = async () => {
+    if (!editingStatusOrderId) return;
     setStatusUpdating(true);
     setStatusUpdateError(null);
     try {
-      await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
-      // Update local orders state to reflect new status
-      // Since orders come from redux, ideally dispatch an action or refetch orders
-      // For simplicity, refetch orders here
+      await api.put(`/admin/orders/${editingStatusOrderId}/status`, { status: editStatusValue });
       dispatch(fetchOrders());
+      cancelEditingStatus();
     } catch (err) {
       setStatusUpdateError(err.response?.data?.error || err.message || 'Failed to update order status');
     } finally {
@@ -169,18 +123,30 @@ const OrderManagement = () => {
                 <p className="text-sm">Total: ${order.total_price}</p>
                 <p className="text-sm">
                   Status:{' '}
-                  <select
-                    value={order.status}
-                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                    disabled={statusUpdating}
-                    className="border rounded px-2 py-1"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="complete">Complete</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="disapproved">Disapproved</option>
-                  </select>
+                  {editingStatusOrderId === order.id ? (
+                    <>
+                      <input
+                        type="text"
+                        value={editStatusValue}
+                        onChange={(e) => setEditStatusValue(e.target.value)}
+                        disabled={statusUpdating}
+                        className="border rounded px-2 py-1"
+                      />
+                      <Button size="sm" onClick={saveStatusEdit} disabled={statusUpdating}>
+                        {statusUpdating ? 'Saving...' : 'Save'}
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={cancelEditingStatus} disabled={statusUpdating}>
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className={order.status === 'approved' ? 'text-green-600' : 'text-red-600'}>
+                        {order.status}
+                      </span>{' '}
+                      <Button size="sm" onClick={() => startEditingStatus(order)}>Edit</Button>
+                    </>
+                  )}
                 </p>
                 <div className="mt-2">
                   <h4 className="font-semibold">Order Items:</h4>
@@ -195,7 +161,6 @@ const OrderManagement = () => {
                         if (item.service_id) {
                           service = serviceMap.get(item.service_id);
                         }
-                        const isEditing = editingItem && editingItem.orderId === order.id && editingItem.itemId === item.id;
                         return (
                           <li key={item.id} className="flex items-center gap-4 my-2">
                             {product && (
@@ -218,33 +183,6 @@ const OrderManagement = () => {
                                 </div>
                               </>
                             )}
-                            <div>
-                              {isEditing ? (
-                                <>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    value={editQuantity}
-                                    onChange={(e) => setEditQuantity(e.target.value)}
-                                    className="border rounded px-2 py-1 w-20"
-                                  />
-                                  <div className="flex gap-2 mt-1">
-                                    <Button size="sm" onClick={saveEdit} disabled={updateLoading}>
-                                      {updateLoading ? 'Saving...' : 'Save'}
-                                    </Button>
-                                    <Button size="sm" variant="destructive" onClick={cancelEditing} disabled={updateLoading}>
-                                      Cancel
-                                    </Button>
-                                  </div>
-                                  {updateError && <p className="text-red-600 text-sm mt-1">{updateError}</p>}
-                                </>
-                              ) : (
-                                <>
-                                  <p className="text-sm">Quantity: {item.quantity}</p>
-                                  <Button size="sm" onClick={() => startEditing(order.id, item)}>Edit</Button>
-                                </>
-                              )}
-                            </div>
                           </li>
                         );
                       })}
@@ -256,8 +194,12 @@ const OrderManagement = () => {
               </div>
 
               <div className="flex flex-col gap-2 justify-center items-end">
-                {/* Remove approve/disapprove buttons as status dropdown replaces them */}
-                <Button size="sm" onClick={() => navigate(`/admin/orders/${order.id}`)}>View</Button>
+                {order.status !== 'approved' && (
+                  <>
+                    <Button size="sm" onClick={() => handleApprove(order.id)}>Approve</Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDisapprove(order.id)}>Disapprove</Button>
+                  </>
+                )}
               </div>
             </div>
           </Card>
