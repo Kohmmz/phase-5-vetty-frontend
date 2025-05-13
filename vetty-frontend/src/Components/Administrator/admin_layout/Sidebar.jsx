@@ -41,7 +41,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               type="button"
             >
               <div className="relative flex items-center gap-2">
-                <div className="relative text-blue-400">{item.icon}</div>
+              <div className="relative">{item.icon}</div>
                 <span>{item.label}</span>
               </div>
             </button>

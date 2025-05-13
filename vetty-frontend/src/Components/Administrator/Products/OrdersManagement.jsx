@@ -91,7 +91,7 @@ const OrderManagement = () => {
     setStatusUpdating(true);
     setStatusUpdateError(null);
     try {
-      await api.put(`/admin/orders/${editingStatusOrderId}/status`, { status: editStatusValue });
+    await api.put(`/orders/${editingStatusOrderId}/status`, { status: editStatusValue });
       dispatch(fetchOrders());
       cancelEditingStatus();
     } catch (err) {
@@ -118,9 +118,9 @@ const OrderManagement = () => {
           <Card key={order.id} className="order-card">
             <div className="order-header">
               <div className="order-info">
-                <h3>Order #{order.id}</h3>
+                <h3>Order {order.id}</h3>
                 <p>Customer: {order.user_id}</p>
-                <p>Total: ${order.total_price}</p>
+                <p>Total: KES{order.total_price}</p>
               </div>
               <div className="order-status">
                 Status:{' '}
